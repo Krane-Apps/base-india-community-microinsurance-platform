@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-// write custom errors
-// write reentrancy guard modifier
-
 interface WeatherData {
     function getRainStatus(uint256 _latitude, uint256 _longitude) external returns(bool);
 }
