@@ -5,7 +5,7 @@ interface WeatherData {
     function getRainStatus(uint256 _latitude, uint256 _longitude) external returns(bool);
 }
 
-contract Insurance {
+contract CropInsurance {
     uint256 public policyCount;
     bool isInside;
     WeatherData public weatherDataContract;
