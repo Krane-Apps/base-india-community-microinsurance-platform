@@ -9,7 +9,8 @@ app.use(express.json());
 /*
 API_CONFIGS
 */
-const anthropic = new Anthropic({ apiKey:  process.env.ANTHROPIC_API_KEY });
+const apiKey = String(process.env.ANTHROPIC_API_KEY);
+const anthropic = new Anthropic({ apiKey });
 
 
 /*
