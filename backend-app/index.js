@@ -1,6 +1,7 @@
 const express = require('express');
 require('dotenv').config();
 const Anthropic = require('@anthropic-ai/sdk');
+const axios = require('axios');
 const app = express();
 const port = process.env.PORT || 3000;
 app.use(express.json());
@@ -11,6 +12,7 @@ API_CONFIGS
 */
 const apiKey = String(process.env.ANTHROPIC_API_KEY);
 const anthropic = new Anthropic({ apiKey });
+const weatherApiKey = String(process.env.WEATHER_API_KEY);
 
 
 /*
@@ -53,7 +55,10 @@ app.post('/get-premium', async (req, res) => {
       Claim Condition: ${weatherCondition.conditionType} ${weatherCondition.operator} ${weatherCondition.threshold}
     `;
 
-    const aiResponse  = await generateAnthropicResponse(`${policyInfo} ${basePromt}` , res);
+    //get weather forecast
+    const forecast = await fetchWeatherForecast(location.latitude, location.longitude);
+
+    const aiResponse  = await generateAnthropicResponse(`${policyInfo} ${premiumPrompt} ${forecast}` , res);
     const riskFactorMatch = aiResponse.match(/riskFactor:\s*([\d.]+)/);
     const calculatedPremiumMatch = aiResponse.match(/calculatedPremium:\s*([\d.]+)/);
     const majorUpcomingEventsMatch = aiResponse.match(/majorUpcomingEvents:\s*"([^"]*)"/);
@@ -77,21 +82,45 @@ app.post('/process-claim', async (req, res) => {
   try {
     const { policies } = req.body;
     if (!policies || !Array.isArray(policies) || policies.length === 0) {
+      console.log(`[${new Date().toISOString()}] POST /process-claim - Status: 400 - Error: Invalid request body`);
       return res.status(400).json({ error: 'Invalid request body' });
     }
-  
     const policy = policies[0];
-    const canClaim = Math.random() < 0.5;
-    const claimCondition = getRandomClaimCondition(policy.weatherCondition.conditionType);
-  
+    const {
+      policyId,
+      policyName,
+      location,
+      startDate,
+      endDate,
+      weatherCondition,
+      premiumCurrency,
+      maxCoverage,
+      coverageCurrency,
+      premium
+    } = policy;
+
+    const policyInfo = `
+      Policy Name: ${policyName}
+      Location: Latitude ${location.latitude}, Longitude ${location.longitude}
+      Start Date: ${startDate}
+      End Date: ${endDate}
+      Coverage Currency: ${coverageCurrency}
+      Claim Condition: ${weatherCondition.conditionType} ${weatherCondition.operator} ${weatherCondition.threshold}
+      Premium: ${premium}
+    `;
+ 
+    const aiResponse = await generateAnthropicResponse(`${policyInfo} ${claimPrompt}`, res);
+    const canClaimMatch = aiResponse.match(/canClaim:\s*(true|false)/);
+    const claimConditionMessageMatch = aiResponse.match(/claimConditionMessage:\s*"([^"]*)"/);
+
     const response = {
       policyId: policy.policyId,
-      canClaim: canClaim,
-      claimConditionMessage: claimCondition
+      canClaim: canClaimMatch ? canClaimMatch[1] === 'true' : false,
+      claimConditionMessage: claimConditionMessageMatch ? claimConditionMessageMatch[1] : ''
     };
-  
-    console.log(`[${new Date().toISOString()}] POST /process-claim - Status: ${res.statusCode} - PolicyId: ${policy.policyId} - CanClaim: ${canClaim}`);
+    console.log(`[${new Date().toISOString()}] POST /process-claim - Status: ${res.statusCode} - PolicyId: ${response.policyId} - CanClaim: ${response.canClaim}`);
     res.json(response);
+    
   } catch(error) {
     console.error(`[${new Date().toISOString()}] POST /process-claim`, error);
     res.status(500).json({ error: 'An error occurred' });
@@ -127,52 +156,58 @@ async function generateAnthropicResponse(prompt, res) {
   }
 }
 
-function getRandomClaimCondition(conditionType) {
-    const conditions = {
-        "Rainfall": [
-            "Excessive rainfall of 15 mm recorded, exceeding the 10 mm threshold",
-            "Insufficient rainfall of 5 mm recorded, below the 10 mm threshold"
-        ],
-        "Temperature": [
-            "High temperature of 40°C recorded, exceeding the threshold",
-            "Low temperature of 5°C recorded, below the threshold"
-        ],
-        "Wind": [
-            "Strong winds of 100 km/h recorded, exceeding the threshold",
-            "Calm conditions of 10 km/h recorded, below the wind speed threshold"
-        ]
-    };
+async function fetchWeatherForecast(lat, lon) {
+  const url = `https://www.meteosource.com/api/v1/flexi/point?lat=${lat}&lon=${lon}&sections=daily&language=en&units=metric&key=${weatherApiKey}`;
+  const response = await axios.get(url);
+  const dailyData = response.data.daily.data;
 
-    const defaultConditions = [
-        "Unexpected weather conditions met the claim criteria",
-        "Weather conditions did not meet the specified threshold for claims"
-    ];
-
-    const relevantConditions = conditions[conditionType] || defaultConditions;
-    return relevantConditions[Math.floor(Math.random() * relevantConditions.length)];
+  const parsedForecast = dailyData.map(day => ({
+    date: day.day,
+    avgTemp: day.statistics.temperature.avg,
+    avgWindSpeed: day.statistics.wind.avg_speed,
+    avgPrecipitation: day.statistics.precipitation.avg,
+    weather: day.weather
+  }));
+  return parsedForecast;
 }
 
 
 /*
 PROMPTS
 */
-const basePromt = `
+const premiumPrompt = `
 You are an advanced AI system specializing in agricultural insurance risk assessment. You've been provided with details of a crop insurance policy. Your task is to analyze this information and provide a risk assessment, premium calculation, and forecast of major upcoming events.
 
 Please provide the following:
-
 1. Risk Factor: Assess the risk on a scale of 0.0 to 1.0, where 0.0 is extremely low risk and 1.0 is extremely high risk. Consider the location, coverage period, and assumed weather conditions.
-
 2. Calculated Premium: Based on the risk factor and maximum coverage amount, calculate an appropriate premium. Express this as a percentage of the maximum coverage.
-
 3. Major Upcoming Events: Predict any significant events that could affect the crop during the coverage period. This could include weather patterns, seasonal changes, or agricultural milestones.
-
-For this analysis, assume the weather conditions for the next 30 days will be {{WEATHER_CONDITION}}. (very-normal/normal/harsh/severe)
 
 Please format your response as follows:
 riskFactor: [0.0 to 1.0]
 calculatedPremium: [premium amount]
 majorUpcomingEvents: "[Provide a brief explanation of your assessment, including key factors considered in 15 words]"
+
+DO NOT ADD ANY EXTRA TEXT IN RESPONSE, JUST THE FORMATTED RESPONSE
+
+For this analysis, the weather conditions for the next 30 days will be
+`;
+
+const claimPrompt = `
+You are an advanced AI system specializing in agricultural insurance claim assessment. You've been provided with details of a crop insurance policy. Your task is to analyze this information and determine if a claim can be made based on the assumed weather conditions.
+
+Please consider the following factors:
+1. The policy's weather condition requirements
+2. Policy date range is from startDate to endDate
+3. Assumed weather conditions for the date range
+
+Based on these factors, determine whether a claim can be made
+
+For this analysis, assume the weather conditions are {{WEATHER_CONDITION}}. (normal/extreme/uncertain)
+
+Please format your response as follows:
+canClaim: [true/false]
+claimConditionMessage: "[Provide a brief explanation for the claim decision in 15 words or less]"
 
 DO NOT ADD ANY EXTRA TEXT IN RESPONSE, JUST THE FORMATTED RESPONSE
 `;
