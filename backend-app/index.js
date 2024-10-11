@@ -1,11 +1,25 @@
 const express = require('express');
+const ethers = require('ethers');
 const dotenv = require('dotenv');
+const cors = require('cors');
 dotenv.config();
 const Anthropic = require('@anthropic-ai/sdk');
 const axios = require('axios');
 const app = express();
 const port = process.env.PORT || 3000;
 app.use(express.json());
+
+/*
+CORS_CONFIG
+*/
+const corsOptions = {
+  origin: 'https://cropsafe-base-sea-hackathon.vercel.app',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 204
+};
+app.use(cors(corsOptions));
 
 
 /*
@@ -14,6 +28,17 @@ API_CONFIGS
 const apiKey = String(process.env.ANTHROPIC_API_KEY);
 const anthropic = new Anthropic({ apiKey });
 const weatherApiKey = String(process.env.WEATHER_API_KEY);
+
+
+/*
+WEB3_CONFIGS
+*/
+const provider = new ethers.JsonRpcProvider(String(process.env.ETHEREUM_RPC_URL));
+const privateKey = String(process.env.PRIVATE_KEY);
+const wallet = new ethers.Wallet(privateKey, provider);
+const contractAddress = String(process.env.CONTRACT_ADDRESS);
+const contractABI = require('./contractABI.json');
+const contract = new ethers.Contract(contractAddress, contractABI, wallet);
 
 
 /*
@@ -123,7 +148,15 @@ app.post('/process-claim', async (req, res) => {
     };
     console.log(`[${new Date().toISOString()}] POST /process-claim - Status: ${res.statusCode} - PolicyId: ${response.policyId} - CanClaim: ${response.canClaim}`);
     res.json(response);
-    
+
+    //now calling contract and completing transaction
+    if(response.canClaim){
+      console.log(`[${new Date().toISOString()}] POST /process-claim: Policy claim initiated`);
+      const tx = await contract.updatePolicyClaim(policyId, maxCoverage);
+      const receipt = await tx.wait();
+      console.log(`[${new Date().toISOString()}] POST /process-claim: Policy claim transfered. Transaction hash: ${receipt.hash}`);
+    }
+
   } catch(error) {
     console.error(`[${new Date().toISOString()}] POST /process-claim`, error);
     res.status(500).json({ error: 'An error occurred' });
@@ -221,4 +254,10 @@ SERVER CONFIG
 */
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
+  allLogs();
 });
+
+async function allLogs() {
+  const blockNo = await provider.getBlock();
+  console.log(`provider block number: ${blockNo.hash}`);
+}
