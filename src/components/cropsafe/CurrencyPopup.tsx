@@ -2,7 +2,7 @@ import React from "react";
 import { currencies } from "src/constants";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dailog";
 import { Label } from "../ui/label";
-import { Select, SelectItem } from "../ui/select";
+import Select from "react-select";
 
 function CurrencyPopup({
   showCurrencyPopup,
@@ -10,6 +10,11 @@ function CurrencyPopup({
   selectedCurrency,
   setSelectedCurrency,
 }: any) {
+  const currencyOptions = currencies.map((currency) => ({
+    value: currency.code,
+    label: `${currency.name} (${currency.code})`,
+  }));
+
   return (
     <Dialog open={showCurrencyPopup} onOpenChange={setShowCurrencyPopup}>
       <DialogContent className="sm:max-w-[425px]">
@@ -23,21 +28,25 @@ function CurrencyPopup({
             Choose your local currency
           </Label>
           <Select
-            value={selectedCurrency.code}
-            onValueChange={(value) => {
-              const currency = currencies.find((c) => c.code === value);
+            value={{
+              value: selectedCurrency.code,
+              label: `${selectedCurrency.name} (${selectedCurrency.code})`,
+            }}
+            onChange={(option: any) => {
+              const currency = currencies.find((c) => c.code === option.value);
               if (currency) {
                 setSelectedCurrency(currency);
                 setShowCurrencyPopup(false);
               }
             }}
-          >
-            {currencies.map((currency) => (
-              <SelectItem key={currency.code} value={currency.code}>
-                {currency.name} ({currency.code})
-              </SelectItem>
-            ))}
-          </Select>
+            options={currencyOptions}
+            styles={{
+              control: (provided) => ({
+                ...provided,
+                marginTop: "8px",
+              }),
+            }}
+          />
         </div>
       </DialogContent>
     </Dialog>

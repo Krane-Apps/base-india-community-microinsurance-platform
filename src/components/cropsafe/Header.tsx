@@ -1,22 +1,24 @@
 import { address } from "framer-motion/client";
 import { Home, Menu } from "lucide-react";
-import { basename } from "path";
 import React from "react";
 import { currencies } from "src/constants";
 import LoginButton from "../LoginButton";
 import { Button } from "../ui/button";
-import { Select, SelectItem } from "../ui/select";
 import Image from "next/image";
+import Select from "react-select";
 
 function Header({
   isLoggedIn,
   setCurrentView,
   selectedCurrency,
   setSelectedCurrency,
-  showMobileMenu,
-  setShowMobileMenu,
   basename,
 }: any) {
+  const currencyOptions = currencies.map((currency) => ({
+    value: currency.code,
+    label: `${currency.symbol} ${currency.code}`,
+  }));
+
   return (
     <header className="sticky top-0 z-50 bg-white shadow-md">
       <div className="container mx-auto px-4 py-2 flex justify-between items-center">
@@ -42,20 +44,44 @@ function Header({
             >
               <Home className="h-5 w-5 text-green-600" />
             </Button>
-            <div className="currency-selector">
+            <div className="currency-selector" style={{ width: "120px" }}>
               <Select
-                value={selectedCurrency.code}
-                onValueChange={(value) => {
-                  const currency = currencies.find((c) => c.code === value);
+                value={{
+                  value: selectedCurrency.code,
+                  label: `${selectedCurrency.symbol} ${selectedCurrency.code}`,
+                }}
+                onChange={(option: any) => {
+                  const currency = currencies.find(
+                    (c) => c.code === option.value
+                  );
                   if (currency) setSelectedCurrency(currency);
                 }}
-              >
-                {currencies.map((currency) => (
-                  <SelectItem key={currency.code} value={currency.code}>
-                    {currency.symbol}
-                  </SelectItem>
-                ))}
-              </Select>
+                options={currencyOptions}
+                isSearchable={false}
+                styles={{
+                  control: (provided) => ({
+                    ...provided,
+                    minHeight: "32px",
+                    height: "32px",
+                  }),
+                  valueContainer: (provided) => ({
+                    ...provided,
+                    height: "32px",
+                    padding: "0 6px",
+                  }),
+                  input: (provided) => ({
+                    ...provided,
+                    margin: "0px",
+                  }),
+                  indicatorSeparator: () => ({
+                    display: "none",
+                  }),
+                  indicatorsContainer: (provided) => ({
+                    ...provided,
+                    height: "32px",
+                  }),
+                }}
+              />
             </div>
           </div>
         ) : (
