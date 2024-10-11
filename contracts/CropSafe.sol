@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-contract CropInsurance {
+contract CropSafe {
     uint256 public policyCount;
 
     bool isInside;
@@ -135,23 +135,23 @@ contract CropInsurance {
         totalPremiumPaid[msg.sender][_policyId] += policy.premium;
     }
 
-    function fileClaim(uint256 _policyId, WeatherCondition memory _weatherCondition) external {
-        // require(currentPolicy[msg.sender] == _policyId,"No policy found");
-        Policy storage policy = policies[_policyId];
-        require(policy.policyholder == msg.sender, "Unauthorised user");
-        require(policy.policyholder != address(0), "No policy found");
-        require(!policy.isClaimed, "Claim already filed");
-        require(policy.isActive, "Policy is not active");
-        require(block.timestamp <= policy.endDate, "Policy has expired");
+    // function fileClaim(uint256 _policyId, WeatherCondition memory _weatherCondition) external {
+    //     // require(currentPolicy[msg.sender] == _policyId,"No policy found");
+    //     Policy storage policy = policies[_policyId];
+    //     require(policy.policyholder == msg.sender, "Unauthorised user");
+    //     require(policy.policyholder != address(0), "No policy found");
+    //     require(!policy.isClaimed, "Claim already filed");
+    //     require(policy.isActive, "Policy is not active");
+    //     require(block.timestamp <= policy.endDate, "Policy has expired");
 
-        policy.isClaimed = true;
-        policy.weatherCondition = _weatherCondition;
-        // policy.active = false;
-        // policy.status = ClaimStatus.Pending;
-        policyClaimStatus[msg.sender][_policyId] = ClaimStatus.Pending;
+    //     policy.isClaimed = true;
+    //     policy.weatherCondition = _weatherCondition;
+    //     // policy.active = false;
+    //     // policy.status = ClaimStatus.Pending;
+    //     policyClaimStatus[msg.sender][_policyId] = ClaimStatus.Pending;
 
-        emit ClaimFiled(_policyId, msg.sender, policy.maxCoverage);
-    }
+    //     emit ClaimFiled(_policyId, msg.sender, policy.maxCoverage);
+    // }
 
     function updatePolicyClaim(uint256 _policyId, uint256 _approvedAmount) external onlyOwner {
         // require(currentPolicy[_user] == _policyId,"No policy found");
