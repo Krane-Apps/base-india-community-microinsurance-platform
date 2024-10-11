@@ -1,38 +1,86 @@
-'use client';
+"use client";
 import {
   Transaction,
   TransactionButton,
   TransactionStatus,
   TransactionStatusAction,
   TransactionStatusLabel,
-} from '@coinbase/onchainkit/transaction';
+} from "@coinbase/onchainkit/transaction";
 import type {
   TransactionError,
   TransactionResponse,
-} from '@coinbase/onchainkit/transaction';
-import type { Address, ContractFunctionParameters } from 'viem';
+} from "@coinbase/onchainkit/transaction";
+import type { Address, ContractFunctionParameters } from "viem";
 import {
   BASE_SEPOLIA_CHAIN_ID,
-  mintABI,
-  mintContractAddress,
-} from '../constants';
+  createPolicyABI,
+  createPolicyContractAddress,
+} from "../constants";
 
-export default function TransactionWrapper({ address }: { address: Address }) {
+interface WeatherCondition {
+  conditionType: string;
+  threshold: string;
+  operator: string;
+}
+
+interface TransactionWrapperProps {
+  address: Address;
+  basename: string;
+  policyName: string;
+  latitude: number;
+  longitude: number;
+  weatherCondition: WeatherCondition;
+  premium: bigint;
+  maxCoverage: bigint;
+  startDate: number;
+  endDate: number;
+  onSuccess: () => void;
+}
+
+export default function TransactionWrapper({
+  address,
+  basename,
+  policyName,
+  latitude,
+  longitude,
+  weatherCondition,
+  premium,
+  maxCoverage,
+  startDate,
+  endDate,
+  onSuccess,
+}: TransactionWrapperProps) {
   const contracts = [
     {
-      address: mintContractAddress,
-      abi: mintABI,
-      functionName: 'mint',
-      args: [address],
+      address: createPolicyContractAddress,
+      abi: createPolicyABI,
+      functionName: "createpolicy",
+      args: [
+        basename,
+        policyName,
+        {
+          latitude: Math.floor(latitude * 1e6),
+          logitude: Math.floor(longitude * 1e6),
+        },
+        weatherCondition,
+        premium,
+        "ETH",
+        maxCoverage,
+        "ETH",
+        startDate,
+        endDate,
+      ],
+      value: premium,
     },
   ] as unknown as ContractFunctionParameters[];
 
   const handleError = (err: TransactionError) => {
-    console.error('Transaction error:', err);
+    console.error("Transaction error:", err);
   };
 
   const handleSuccess = (response: TransactionResponse) => {
-    console.log('Transaction successful', response);
+    console.log("Transaction successful", response);
+    onSuccess();
   };
 
   return (
@@ -44,7 +92,10 @@ export default function TransactionWrapper({ address }: { address: Address }) {
         onError={handleError}
         onSuccess={handleSuccess}
       >
-        <TransactionButton className="mt-0 mr-auto ml-auto w-[450px] max-w-full text-[white]" />
+        <TransactionButton
+          className="mt-0 mr-auto ml-auto max-w-full text-[white]"
+          text="Create Policy"
+        />
         <TransactionStatus>
           <TransactionStatusLabel />
           <TransactionStatusAction />

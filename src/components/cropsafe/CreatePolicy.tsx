@@ -4,12 +4,16 @@ import { formatCurrency } from "src/helper";
 import dynamic from "next/dynamic";
 import axios from "axios";
 import Select from "react-select";
+import { useAccount } from "wagmi";
+import { parseEther } from "viem";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Card, CardContent } from "../ui/card";
 import { Label } from "../ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dailog";
+import TransactionWrapper from "../TransactionWrapper";
 
 const Map = dynamic(() => import("./Map"), { ssr: false });
 
@@ -24,6 +28,13 @@ const weatherOptions = [
   { value: "rainfall", label: "Rainfall above" },
   { value: "temperature", label: "Temperature below" },
 ];
+
+const dummyPremiumResponse = (policyId: string): PremiumQuote => ({
+  policyId,
+  riskFactor: 0.05, // 5% risk factor
+  calculatedPremium: "0.001", // 0.001 ETH premium
+  majorUpcomingEvents: "No major weather events forecasted",
+});
 
 function CreatePolicy({
   selectedCurrency,
@@ -45,6 +56,11 @@ function CreatePolicy({
   const [premiumQuote, setPremiumQuote] = useState<PremiumQuote | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [useDummyResponse, setUseDummyResponse] = useState(true);
+  const [startTimestamp, setStartTimestamp] = useState<number>(0);
+  const [endTimestamp, setEndTimestamp] = useState<number>(0);
+
+  const { address } = useAccount();
 
   const handlePositionChange = (lat: number, lng: number) => {
     setLatitude(lat.toFixed(6));
@@ -67,6 +83,13 @@ function CreatePolicy({
       console.log("Geolocation is not available in this browser.");
     }
   }, []);
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      setStartTimestamp(Math.floor(new Date(startDate).getTime() / 1000));
+      setEndTimestamp(Math.floor(new Date(endDate).getTime() / 1000));
+    }
+  }, [startDate, endDate]);
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -91,42 +114,53 @@ function CreatePolicy({
 
     setIsLoading(true);
     try {
-      const response = await axios.post(
-        "https://cropsafe-base-sea-hackathon.onrender.com/get-premium",
-        {
-          policies: [
-            {
-              policyId: `POLICY-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
-              policyHolder: "0x123abc456def789ghi",
-              basename: basename,
-              policyName,
-              location: {
-                latitude: parseFloat(latitude),
-                longitude: parseFloat(longitude),
+      let response;
+      if (useDummyResponse) {
+        // use dummy response
+        const policyId = `POLICY-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+        response = dummyPremiumResponse(policyId);
+        // simulate API delay
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      } else {
+        // use actual API
+        const apiResponse = await axios.post(
+          "https://cropsafe-base-sea-hackathon.onrender.com/get-premium",
+          {
+            policies: [
+              {
+                policyId: `POLICY-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+                policyHolder: address,
+                basename: basename,
+                policyName,
+                location: {
+                  latitude: parseFloat(latitude),
+                  longitude: parseFloat(longitude),
+                },
+                startDate,
+                endDate,
+                premiumCurrency: "ETH",
+                maxCoverage: 20,
+                coverageCurrency: "ETH",
+                weatherCondition: {
+                  conditionType: weatherCondition?.value,
+                  threshold: `${threshold} ${weatherCondition?.value === "temperature" ? "celsius" : "mm"}`,
+                  operator:
+                    weatherCondition?.value === "rainfall"
+                      ? "greaterThan"
+                      : "lessThan",
+                },
               },
-              startDate,
-              endDate,
-              premiumCurrency: "ETH",
-              maxCoverage: 20,
-              coverageCurrency: "ETH",
-              weatherCondition: {
-                conditionType: weatherCondition?.value,
-                threshold: `${threshold} ${weatherCondition?.value === "temperature" ? "celsius" : "mm"}`,
-                operator:
-                  weatherCondition?.value === "rainfall"
-                    ? "greaterThan"
-                    : "lessThan",
-              },
-            },
-          ],
-        }
-      );
-      console.log(response.data);
-      setPremiumQuote(response.data);
+            ],
+          }
+        );
+        response = apiResponse.data;
+      }
+
+      console.log(response);
+      setPremiumQuote(response);
       setShowPremiumQuote(true);
     } catch (error) {
       console.error("Error calculating premium:", error);
-      setShowPremiumQuote(true);
     } finally {
       setIsLoading(false);
     }
@@ -282,6 +316,21 @@ function CreatePolicy({
                 <p className="text-red-500 text-sm mt-1">{errors.threshold}</p>
               )}
             </div>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="useDummyResponse"
+                checked={useDummyResponse}
+                onChange={(e) => setUseDummyResponse(e.target.checked)}
+                className="mr-2"
+              />
+              <Label
+                htmlFor="useDummyResponse"
+                className="text-sm text-gray-700"
+              >
+                Use dummy response (for testing)
+              </Label>
+            </div>
             <Button
               type="submit"
               disabled={isLoading}
@@ -294,7 +343,13 @@ function CreatePolicy({
       </Card>
       <Dialog open={showPremiumQuote} onOpenChange={setShowPremiumQuote}>
         <DialogContent className="sm:max-w-[425px] fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full relative">
+            <button
+              onClick={() => setShowPremiumQuote(false)}
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+            >
+              <XMarkIcon className="h-6 w-6" />
+            </button>
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold text-gray-800">
                 Premium Quote
@@ -326,22 +381,32 @@ function CreatePolicy({
                 </p>
               </div>
             )}
-            <div className="flex justify-end space-x-4 mt-6">
-              <Button
-                variant="outline"
-                onClick={() => setShowPremiumQuote(false)}
-              >
-                Modify Policy Details
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowPremiumQuote(false);
-                  setTimeout(() => setCurrentView("myPolicies"), 2000);
-                }}
-                className="bg-green-600 hover:bg-green-700 transition-colors duration-300"
-              >
-                Accept and Proceed to Payment
-              </Button>
+            <div className="flex justify-center mt-6">
+              {premiumQuote && (
+                <TransactionWrapper
+                  address={address ?? "0x"}
+                  basename={basename}
+                  policyName={policyName}
+                  latitude={parseFloat(latitude)}
+                  longitude={parseFloat(longitude)}
+                  weatherCondition={{
+                    conditionType: weatherCondition?.value ?? "",
+                    threshold: threshold,
+                    operator:
+                      weatherCondition?.value === "rainfall"
+                        ? "greaterThan"
+                        : "lessThan",
+                  }}
+                  premium={parseEther(premiumQuote.calculatedPremium)}
+                  maxCoverage={parseEther("20")}
+                  startDate={startTimestamp}
+                  endDate={endTimestamp}
+                  onSuccess={() => {
+                    setShowPremiumQuote(false);
+                    setCurrentView("myPolicies");
+                  }}
+                />
+              )}
             </div>
           </div>
         </DialogContent>

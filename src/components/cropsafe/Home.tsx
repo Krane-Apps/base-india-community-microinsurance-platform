@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Joyride from "react-joyride";
-import { useAccount } from "wagmi";
+import { useAccount, useContractRead } from "wagmi";
 import LoginButton from "../LoginButton";
 import Image from "next/image";
 
@@ -25,9 +25,37 @@ import {
   CardDescription,
   CardContent,
 } from "../ui/card";
-import { currencies, steps } from "src/constants";
+import {
+  currencies,
+  steps,
+  createPolicyABI,
+  createPolicyContractAddress,
+} from "src/constants";
 import CurrencyPopup from "./CurrencyPopup";
 import Header from "./Header";
+
+interface Policy {
+  policyId: bigint;
+  policyholder: string;
+  basename: string;
+  policyName: string;
+  location: { latitude: bigint; logitude: bigint };
+  startDate: bigint;
+  endDate: bigint;
+  premium: bigint;
+  premiumCurrency: string;
+  maxCoverage: bigint;
+  coverageCurrency: string;
+  weatherCondition: {
+    conditionType: string;
+    threshold: string;
+    operator: string;
+  };
+  isActive: boolean;
+  isClaimed: boolean;
+  createdAt: bigint;
+  updatedAt: bigint;
+}
 
 export default function CropSafe() {
   const { address } = useAccount();
@@ -40,6 +68,22 @@ export default function CropSafe() {
   const [runTour, setRunTour] = useState(false);
   const [showCurrencyPopup, setShowCurrencyPopup] = useState(true);
   const [selectedCurrency, setSelectedCurrency] = useState(currencies[0]);
+  const [policies, setPolicies] = useState<Policy[]>([]);
+  const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null);
+
+  const { data: policyData } = useContractRead({
+    address: createPolicyContractAddress,
+    abi: createPolicyABI,
+    functionName: "getAllPolicies",
+    args: [address],
+  });
+
+  useEffect(() => {
+    if (policyData) {
+      console.log("policyData", policyData);
+      setPolicies(policyData as Policy[]);
+    }
+  }, [policyData]);
 
   useEffect(() => {
     if (address) {
@@ -116,10 +160,12 @@ export default function CropSafe() {
 
   const renderMyPolicies = () => (
     <MyPolicies
-      selectedCurrency={selectedCurrency}
+      selectedCurrency={selectedCurrency.code}
       setCurrentView={setCurrentView}
       setShowClaimForm={setShowClaimForm}
       showClaimForm={showClaimForm}
+      policies={policies as any}
+      setSelectedPolicy={setSelectedPolicy}
     />
   );
 
@@ -128,6 +174,7 @@ export default function CropSafe() {
       selectedCurrency={selectedCurrency}
       setCurrentView={setCurrentView}
       setShowClaimForm={setShowClaimForm}
+      policy={selectedPolicy as any}
     />
   );
 

@@ -13,11 +13,46 @@ import {
   CardFooter,
 } from "../ui/card";
 
+interface Policy {
+  policyId: bigint;
+  policyholder: string;
+  basename: string;
+  policyName: string;
+  location: { latitude: bigint; logitude: bigint };
+  startDate: bigint;
+  endDate: bigint;
+  premium: bigint;
+  premiumCurrency: string;
+  maxCoverage: bigint;
+  coverageCurrency: string;
+  weatherCondition: {
+    conditionType: string;
+    threshold: string;
+    operator: string;
+  };
+  isActive: boolean;
+  isClaimed: boolean;
+  createdAt: bigint;
+  updatedAt: bigint;
+}
+
+interface MyPoliciesProps {
+  selectedCurrency: string;
+  setCurrentView: (view: string) => void;
+  setShowClaimForm: (show: boolean) => void;
+  showClaimForm: boolean;
+  policies: Policy[];
+  setSelectedPolicy: (policy: Policy) => void;
+}
+
 function MyPolicies({
   selectedCurrency,
   setCurrentView,
   setShowClaimForm,
-}: any) {
+  showClaimForm,
+  policies,
+  setSelectedPolicy,
+}: MyPoliciesProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -28,53 +63,66 @@ function MyPolicies({
     >
       <h2 className="text-3xl font-bold mb-6 text-gray-800">My Policies</h2>
       <div className="space-y-6">
-        {[
-          {
-            name: "Corn Field Policy",
-            period: "May 1, 2023 - Oct 31, 2023",
-            status: "Active",
-            icon: Umbrella,
-            coverage: 10000,
-          },
-          {
-            name: "Wheat Field Policy",
-            period: "Jun 15, 2023 - Nov 30, 2023",
-            status: "Active",
-            icon: Thermometer,
-            coverage: 15000,
-          },
-        ].map((policy, index) => (
+        {policies.map((policy, index) => (
           <Card
             key={index}
             className="policy-card bg-white shadow-xl rounded-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300"
           >
             <CardHeader className="bg-gradient-to-r from-green-400 to-blue-500 text-white">
               <div className="flex items-center space-x-4">
-                <policy.icon className="h-8 w-8" />
+                {policy.weatherCondition.conditionType === "rainfall" ? (
+                  <Umbrella className="h-8 w-8" />
+                ) : (
+                  <Thermometer className="h-8 w-8" />
+                )}
                 <div>
-                  <CardTitle className="text-xl">{policy.name}</CardTitle>
+                  <CardTitle className="text-xl">{policy.policyName}</CardTitle>
                   <CardDescription className="text-gray-100">
-                    {policy.period}
+                    {new Date(
+                      Number(policy.startDate) * 1000
+                    ).toLocaleDateString()}{" "}
+                    -{" "}
+                    {new Date(
+                      Number(policy.endDate) * 1000
+                    ).toLocaleDateString()}
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-6">
               <p className="text-lg font-semibold text-gray-700">
-                Status: <span className="text-green-600">{policy.status}</span>
+                Status:{" "}
+                <span
+                  className={
+                    policy.isActive ? "text-green-600" : "text-red-600"
+                  }
+                >
+                  {policy.isActive ? "Active" : "Inactive"}
+                </span>
               </p>
               <p className="text-lg font-semibold text-gray-700">
                 Coverage:{" "}
                 <span className="text-blue-600">
-                  {formatCurrency(policy.coverage, selectedCurrency)}
+                  {formatCurrency(
+                    Number(policy.maxCoverage) / 1e18,
+                    selectedCurrency
+                  )}
                 </span>
+              </p>
+              <p className="text-lg font-semibold text-gray-700">
+                Weather Condition: {policy.weatherCondition.conditionType}{" "}
+                {policy.weatherCondition.operator}{" "}
+                {policy.weatherCondition.threshold}
               </p>
             </CardContent>
             <CardFooter className="bg-gray-50 p-4">
               <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 w-full">
                 <Button
                   variant="outline"
-                  onClick={() => setCurrentView("policyDetails")}
+                  onClick={() => {
+                    setSelectedPolicy(policy);
+                    setCurrentView("policyDetails");
+                  }}
                   className="w-full sm:w-auto"
                 >
                   View Details
@@ -82,8 +130,9 @@ function MyPolicies({
                 <Button
                   onClick={() => setShowClaimForm(true)}
                   className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 transition-colors duration-300"
+                  disabled={!policy.isActive || policy.isClaimed}
                 >
-                  File a Claim
+                  {policy.isClaimed ? "Claim Filed" : "File a Claim"}
                 </Button>
               </div>
             </CardFooter>
