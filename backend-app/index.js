@@ -1,5 +1,5 @@
 const express = require('express');
-require('dotenv').config();
+const dotenv = require('dotenv');
 dotenv.config();
 const Anthropic = require('@anthropic-ai/sdk');
 const axios = require('axios');
