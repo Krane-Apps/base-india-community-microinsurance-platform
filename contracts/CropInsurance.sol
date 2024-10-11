@@ -197,11 +197,12 @@ contract CropInsurance {
         return policies[msg.sender][_policyId];
     }
 
-    function getPolicyDetail(address _user, uint256 _policyId) public view onlyOwner returns (Policy memory) {
+    function getPolicyDetail(address _user, uint256 _policyId) public view returns (Policy memory) {
+        require(msg.sender == owner);
         return policies[_user][_policyId];
     }
 
-    function getPolicyIds(address _user) public view onlyOwner returns(uint256[] memory) {
+    function getPolicyIds(address _user) public view returns(uint256[] memory) {
         return allUserpolicyIds[_user];
     }
 
