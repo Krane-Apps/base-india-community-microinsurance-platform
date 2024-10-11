@@ -11,7 +11,6 @@ app.use(express.json());
 /*
 API_CONFIGS
 */
-const requiredEnvVars = ['ANTHROPIC_API_KEY', 'WEATHER_API_KEY'];
 const apiKey = String(process.env.ANTHROPIC_API_KEY);
 const anthropic = new Anthropic({ apiKey });
 const weatherApiKey = String(process.env.WEATHER_API_KEY);
@@ -56,6 +55,7 @@ app.post('/get-premium', async (req, res) => {
       Coverage Currency: ${coverageCurrency}
       Claim Condition: ${weatherCondition.conditionType} ${weatherCondition.operator} ${weatherCondition.threshold}
     `;
+    console.log(`[${new Date().toISOString()}] POST /get-premium - Received: ${policyInfo}`);
 
     //get weather forecast
     const forecast = await fetchWeatherForecast(location.latitude, location.longitude);
@@ -71,7 +71,7 @@ app.post('/get-premium', async (req, res) => {
       calculatedPremium: `${calculatedPremiumMatch[1]} ${policy.coverageCurrency}`,
       majorUpcomingEvents: majorUpcomingEventsMatch[1]
     };
-    console.log(`[${new Date().toISOString()}] POST /get-premium - Status: ${res.statusCode} - PolicyId: ${response.policyId} - Premium: ${response.calculatedPremium} ${response.riskFactor}`);
+    console.log(`[${new Date().toISOString()}] POST /get-premium - Status: ${res.statusCode} - PolicyId: ${response.policyId} - Premium: ${response.calculatedPremium} - RiskFactor ${response.riskFactor}`);
     res.json(response);
 
   } catch(error) {
@@ -110,6 +110,7 @@ app.post('/process-claim', async (req, res) => {
       Claim Condition: ${weatherCondition.conditionType} ${weatherCondition.operator} ${weatherCondition.threshold}
       Premium: ${premium}
     `;
+    console.log(`[${new Date().toISOString()}] POST /process-claim - Received: ${policyInfo}`);
  
     const aiResponse = await generateAnthropicResponse(`${policyInfo} ${claimPrompt}`, res);
     const canClaimMatch = aiResponse.match(/canClaim:\s*(true|false)/);
@@ -220,9 +221,4 @@ SERVER CONFIG
 */
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
-  console.log(requiredEnvVars);
-  console.log('weather key:', weatherApiKey);
-  console.log('antropic key:', apiKey);
-  console.log('weather key 2 :', process.env.WEATHER_API_KEY);
-  console.log('weather key 2 :', process.env.ANTHROPIC_API_KEY);
 });
