@@ -1,5 +1,6 @@
 const express = require('express');
 require('dotenv').config();
+dotenv.config();
 const Anthropic = require('@anthropic-ai/sdk');
 const axios = require('axios');
 const app = express();
@@ -10,6 +11,7 @@ app.use(express.json());
 /*
 API_CONFIGS
 */
+const requiredEnvVars = ['ANTHROPIC_API_KEY', 'WEATHER_API_KEY'];
 const apiKey = String(process.env.ANTHROPIC_API_KEY);
 const anthropic = new Anthropic({ apiKey });
 const weatherApiKey = String(process.env.WEATHER_API_KEY);
@@ -218,6 +220,9 @@ SERVER CONFIG
 */
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
+  console.log(requiredEnvVars);
   console.log('weather key:', weatherApiKey);
   console.log('antropic key:', apiKey);
+  console.log('weather key 2 :', process.env.WEATHER_API_KEY);
+  console.log('weather key 2 :', process.env.ANTHROPIC_API_KEY);
 });
