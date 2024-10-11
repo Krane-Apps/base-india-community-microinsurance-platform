@@ -218,4 +218,6 @@ SERVER CONFIG
 */
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
+  console.log('weather key:', weatherApiKey);
+  console.log('antropic key:', apiKey);
 });
