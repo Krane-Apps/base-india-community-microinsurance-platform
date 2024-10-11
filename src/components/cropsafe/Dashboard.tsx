@@ -15,21 +15,27 @@ function Dashboard({ setCurrentView, basename, selectedCurrency }: any) {
       transition={{ duration: 0.5 }}
       className="p-4 md:p-6 max-w-4xl mx-auto"
     >
-      <h2 className="dashboard-welcome text-3xl font-bold mb-6 text-gray-800">
+      <h2 className="dashboard-welcome text-xl font-bold mb-6 text-gray-800">
         Welcome, {basename}!
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <Button
           onClick={() => setCurrentView("createPolicy")}
-          className="create-policy-button h-24 text-lg bg-green-600 hover:bg-green-700 transition-colors duration-300 rounded-lg shadow-lg"
+          className="create-policy-button h-24 text-lg bg-green-600 hover:bg-green-700 transition-colors duration-300 rounded-lg shadow-lg flex items-center justify-center"
         >
-          <PlusCircle className="mr-2 h-6 w-6" /> Create New Policy
+          <div className="flex items-center">
+            <PlusCircle className="mr-2 h-6 w-6" />
+            <span>Create New Policy</span>
+          </div>
         </Button>
         <Button
           onClick={() => setCurrentView("myPolicies")}
-          className="view-policies-button h-24 text-lg bg-blue-600 hover:bg-blue-700 transition-colors duration-300 rounded-lg shadow-lg"
+          className="view-policies-button h-24 text-lg bg-blue-600 hover:bg-blue-700 transition-colors duration-300 rounded-lg shadow-lg flex items-center justify-center"
         >
-          <FileText className="mr-2 h-6 w-6" /> View My Policies
+          <div className="flex items-center">
+            <FileText className="mr-2 h-6 w-6" />
+            <span>View My Policies</span>
+          </div>
         </Button>
       </div>
       <Card className="policy-summary bg-white shadow-xl rounded-lg overflow-hidden">

@@ -25,9 +25,6 @@ import {
   CardDescription,
   CardContent,
 } from "../ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dailog";
-import { Label } from "../ui/label";
-import { Select, SelectItem } from "../ui/select";
 import { currencies, steps } from "src/constants";
 import CurrencyPopup from "./CurrencyPopup";
 import Header from "./Header";
