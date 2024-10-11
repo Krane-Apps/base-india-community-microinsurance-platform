@@ -7,10 +7,10 @@ contract CropInsurance {
     bool isInside;
 
     enum ClaimStatus {
-        NotFiled,
+        // NotFiled,
         Pending,
         Rejected,
-        Approved,
+        // Approved,
         Withdrawn
     }
 
@@ -46,13 +46,13 @@ contract CropInsurance {
         uint256 updatedAt;
     }
 
-
     mapping(uint256 => Policy) policies;
     mapping(address => uint256[]) allUserpolicyIds;
     // mapping(address => uint256) currentPolicy;
     mapping(address => mapping(uint256 => uint256)) totalPremiumPaid;
     mapping(address => mapping(uint256 => ClaimStatus)) policyClaimStatus;
     mapping(address => mapping(uint256 => uint256)) approvedAmount;
+    mapping(address => Policy[]) policyCollection;
 
     modifier nonReentrant() {
         require(!isInside, "Reentracy attempt!");
@@ -119,9 +119,9 @@ contract CropInsurance {
 
         // currentPolicy[msg.sender] = policyCount;
         totalPremiumPaid[msg.sender][policyCount] += _premium;
-        policyClaimStatus[msg.sender][policyCount] = ClaimStatus.NotFiled;
+        policyClaimStatus[msg.sender][policyCount] = ClaimStatus.Pending;
         allUserpolicyIds[msg.sender].push(policyCount);
-
+        policyCollection[msg.sender].push(policies[policyCount]);
         emit PolicyCreated(policyCount, msg.sender, _maxCoverage);
     }
 
@@ -159,31 +159,37 @@ contract CropInsurance {
         require(policy.policyholder != address(0), "No policy found");
         require(policy.isActive, "Policy not active");
         require(policyClaimStatus[policy.policyholder][_policyId] == ClaimStatus.Pending, "Invalid claim status found");
-        // require(policy.endDate >= block.timestamp, "Policy has expired");
+        require(block.timestamp <= policy.endDate, "Policy has expired");
         address user = policy.policyholder;
         require(_approvedAmount <= policy.maxCoverage, "Invalid approved coverage");
         if (_approvedAmount == 0) {
             policyClaimStatus[user][_policyId] = ClaimStatus.Rejected;
         } else {
-            policyClaimStatus[user][_policyId] = ClaimStatus.Approved;
+            policyClaimStatus[user][_policyId] = ClaimStatus.Withdrawn;
+            policy.isActive = false;
+            policy.isClaimed = true;
+            (bool sent,) = user.call{value: _approvedAmount}("");
+            require(sent, "Failed to send Ether");            
+            emit ClaimPaid(_policyId, user, _approvedAmount);
+    
         }
         approvedAmount[user][_policyId] = _approvedAmount;
     }
 
-    function withdrawClaim(uint256 _policyId) public nonReentrant {
-        Policy storage policy = policies[_policyId];
-        require(policy.policyholder != address(0), "No policy found");
-        require(policy.isClaimed, "No claim filed for this policy");
-        require(policy.policyholder == msg.sender, "Unauthorised user");
-        // require(_approvedAmount <= policy.coverageAmount, "Approved amount exceeds coverage");
-        require(policyClaimStatus[msg.sender][_policyId] == ClaimStatus.Approved, "Claim not in approved status");
-        policyClaimStatus[msg.sender][_policyId] = ClaimStatus.Withdrawn;
-        policy.isActive = false;
-        (bool sent,) = policy.policyholder.call{value: approvedAmount[msg.sender][_policyId]}("");
-        require(sent, "Failed to send Ether");
+    // function withdrawClaim(uint256 _policyId) public nonReentrant {
+    //     Policy storage policy = policies[_policyId];
+    //     require(policy.policyholder != address(0), "No policy found");
+    //     require(policy.isClaimed, "No claim filed for this policy");
+    //     require(policy.policyholder == msg.sender, "Unauthorised user");
+    //     // require(_approvedAmount <= policy.coverageAmount, "Approved amount exceeds coverage");
+    //     require(policyClaimStatus[msg.sender][_policyId] == ClaimStatus.Approved, "Claim not in approved status");
+    //     policyClaimStatus[msg.sender][_policyId] = ClaimStatus.Withdrawn;
+    //     policy.isActive = false;
+    //     (bool sent,) = policy.policyholder.call{value: approvedAmount[msg.sender][_policyId]}("");
+    //     require(sent, "Failed to send Ether");
         
-        emit ClaimPaid(_policyId, policy.policyholder, approvedAmount[msg.sender][_policyId]);
-    }
+    //     emit ClaimPaid(_policyId, policy.policyholder, approvedAmount[msg.sender][_policyId]);
+    // }
 
     // function withdrawNoClaimBonus(uint256 _policyId) public nonReentrant {
     //     Policy storage policy = policies[msg.sender][_policyId];
@@ -213,6 +219,10 @@ contract CropInsurance {
 
     function checkClaimApprovalAmount(uint256 _policyId) public view returns (uint256) {
         return approvedAmount[msg.sender][_policyId];
+    }
+
+    function getAllPolicies(address user) public view returns(Policy[] memory) {
+        return policyCollection[user];
     }
 
     //// Ether deposit and withraw
