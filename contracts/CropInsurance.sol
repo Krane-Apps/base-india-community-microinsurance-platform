@@ -47,7 +47,7 @@ contract CropInsurance {
     }
 
 
-    mapping(address => mapping(uint256 => Policy)) policies;
+    mapping(uint256 => Policy) policies;
     mapping(address => uint256[]) allUserpolicyIds;
     // mapping(address => uint256) currentPolicy;
     mapping(address => mapping(uint256 => uint256)) totalPremiumPaid;
@@ -84,31 +84,33 @@ contract CropInsurance {
         string memory _basename,
         string memory _policyName,
         Location memory _location,
+        WeatherCondition memory _weatherCondition,
         uint256 _premium,
         string memory _premiumCurrency,
         uint256 _maxCoverage,
         string memory _coverageCurrency,
-        uint256 _duration
+        uint256 _startDate,
+        uint256 _endDate
     ) public payable {
         require(msg.value == _premium, "Premium amount mismatch");
         require(msg.value > 0, "Premium cannot be 0");
-        require(_duration / 365 == 1 && _duration % 365 == 0, "Invalid policy duration"); // duration can only be 1 year
+        require( _endDate>_startDate && _startDate>=block.timestamp, "Invalid policy timstamp");
 
         policyCount++;
 
-        policies[msg.sender][policyCount] = Policy({
+        policies[policyCount] = Policy({
             policyId: policyCount,
             policyholder: msg.sender,
             basename: _basename,
             policyName: _policyName,
             location: _location,
-            startDate: block.timestamp,
-            endDate: block.timestamp + _duration,
+            startDate: _startDate,
+            endDate: _endDate,
             premium: _premium,
             premiumCurrency: _premiumCurrency,
             maxCoverage: _maxCoverage,
             coverageCurrency: _coverageCurrency,
-            weatherCondition: WeatherCondition("", "", ""),
+            weatherCondition: _weatherCondition,
             isActive: true,
             isClaimed: false,
             createdAt: block.timestamp,
@@ -124,7 +126,8 @@ contract CropInsurance {
     }
 
     function payPremium(uint256 _policyId) public payable {
-        Policy memory policy = policies[msg.sender][_policyId];
+        Policy memory policy = policies[_policyId];
+        require(policy.policyholder == msg.sender, "Unauthorised user");
         require(policy.policyholder != address(0), "No policy found");
         require(policy.isActive, "Policy is not active");
         require(msg.value == policy.premium, "Premium is mismatched");
@@ -134,7 +137,8 @@ contract CropInsurance {
 
     function fileClaim(uint256 _policyId, WeatherCondition memory _weatherCondition) external {
         // require(currentPolicy[msg.sender] == _policyId,"No policy found");
-        Policy storage policy = policies[msg.sender][_policyId];
+        Policy storage policy = policies[_policyId];
+        require(policy.policyholder == msg.sender, "Unauthorised user");
         require(policy.policyholder != address(0), "No policy found");
         require(!policy.isClaimed, "Claim already filed");
         require(policy.isActive, "Policy is not active");
@@ -149,26 +153,28 @@ contract CropInsurance {
         emit ClaimFiled(_policyId, msg.sender, policy.maxCoverage);
     }
 
-    function updatePolicyClaim(address _user, uint256 _policyId, uint256 _approvedAmount) external onlyOwner {
+    function updatePolicyClaim(uint256 _policyId, uint256 _approvedAmount) external onlyOwner {
         // require(currentPolicy[_user] == _policyId,"No policy found");
-        Policy memory policy = policies[_user][_policyId];
+        Policy memory policy = policies[_policyId];
         require(policy.policyholder != address(0), "No policy found");
         require(policy.isActive, "Policy not active");
-        require(policyClaimStatus[_user][_policyId] == ClaimStatus.Pending, "Invalid claim status found");
+        require(policyClaimStatus[policy.policyholder][_policyId] == ClaimStatus.Pending, "Invalid claim status found");
         // require(policy.endDate >= block.timestamp, "Policy has expired");
+        address user = policy.policyholder;
         require(_approvedAmount <= policy.maxCoverage, "Invalid approved coverage");
         if (_approvedAmount == 0) {
-            policyClaimStatus[_user][_policyId] = ClaimStatus.Rejected;
+            policyClaimStatus[user][_policyId] = ClaimStatus.Rejected;
         } else {
-            policyClaimStatus[_user][_policyId] = ClaimStatus.Approved;
+            policyClaimStatus[user][_policyId] = ClaimStatus.Approved;
         }
-        approvedAmount[_user][_policyId] = _approvedAmount;
+        approvedAmount[user][_policyId] = _approvedAmount;
     }
 
     function withdrawClaim(uint256 _policyId) public nonReentrant {
-        Policy storage policy = policies[msg.sender][_policyId];
+        Policy storage policy = policies[_policyId];
         require(policy.policyholder != address(0), "No policy found");
         require(policy.isClaimed, "No claim filed for this policy");
+        require(policy.policyholder == msg.sender, "Unauthorised user");
         // require(_approvedAmount <= policy.coverageAmount, "Approved amount exceeds coverage");
         require(policyClaimStatus[msg.sender][_policyId] == ClaimStatus.Approved, "Claim not in approved status");
         policyClaimStatus[msg.sender][_policyId] = ClaimStatus.Withdrawn;
@@ -179,27 +185,22 @@ contract CropInsurance {
         emit ClaimPaid(_policyId, policy.policyholder, approvedAmount[msg.sender][_policyId]);
     }
 
-    function withdrawNoClaimBonus(uint256 _policyId) public nonReentrant {
-        Policy storage policy = policies[msg.sender][_policyId];
-        require(policy.policyholder != address(0), "No policy found");
-        require(!policy.isClaimed, "Policy already claimed");
-        require(block.timestamp > policy.endDate, "Policy ongoing");
-        require(policy.isActive, "Policy not active");
-        uint256 bonus = (policy.premium * 12 * 20) / 100; // bonus = 20% of total premium paid
-        policy.isActive = false;
-        (bool sent,) = policy.policyholder.call{value: bonus}("");
-        require(sent, "Failed to send ether");
-    }
+    // function withdrawNoClaimBonus(uint256 _policyId) public nonReentrant {
+    //     Policy storage policy = policies[msg.sender][_policyId];
+    //     require(policy.policyholder != address(0), "No policy found");
+    //     require(!policy.isClaimed, "Policy already claimed");
+    //     require(block.timestamp > policy.endDate, "Policy ongoing");
+    //     require(policy.isActive, "Policy not active");
+    //     uint256 bonus = (policy.premium * 12 * 20) / 100; // bonus = 20% of total premium paid
+    //     policy.isActive = false;
+    //     (bool sent,) = policy.policyholder.call{value: bonus}("");
+    //     require(sent, "Failed to send ether");
+    // }
 
     //// Getter functions
 
     function getPolicyDetail(uint256 _policyId) external view returns (Policy memory) {
-        return policies[msg.sender][_policyId];
-    }
-
-    function getPolicyDetail(address _user, uint256 _policyId) public view returns (Policy memory) {
-        require(msg.sender == owner);
-        return policies[_user][_policyId];
+        return policies[_policyId];
     }
 
     function getPolicyIds(address _user) public view returns(uint256[] memory) {
