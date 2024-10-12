@@ -1,5 +1,6 @@
 // define an interface for the currency object
 export interface Currency {
+  code: any;
   rate: number;
   symbol: string;
 }
