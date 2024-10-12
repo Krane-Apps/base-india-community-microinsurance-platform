@@ -179,9 +179,24 @@ function MyPolicies({
                 </span>
               </p>
               <p className="text-lg font-semibold text-gray-700">
-                Weather Condition: {policy.weatherCondition.conditionType}{" "}
-                {policy.weatherCondition.operator}{" "}
-                {policy.weatherCondition.threshold}
+                Weather Condition:{" "}
+                {policy.weatherCondition.operator === "greaterThan" ? (
+                  <>
+                    {policy.weatherCondition.conditionType} above{" "}
+                    {policy.weatherCondition.threshold}
+                  </>
+                ) : policy.weatherCondition.operator === "lessThan" ? (
+                  <>
+                    {policy.weatherCondition.conditionType} below{" "}
+                    {policy.weatherCondition.threshold}
+                  </>
+                ) : (
+                  <>
+                    {policy.weatherCondition.conditionType}{" "}
+                    {policy.weatherCondition.operator}{" "}
+                    {policy.weatherCondition.threshold}
+                  </>
+                )}
               </p>
             </CardContent>
             <CardFooter className="bg-gray-50 p-4">

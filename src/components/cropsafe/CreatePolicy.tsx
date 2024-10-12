@@ -25,36 +25,74 @@ interface PremiumQuote {
 }
 
 const weatherOptions = [
-  { value: "heavyRainfall", label: "Heavy Rainfall" },
-  { value: "flooding", label: "Flooding" },
-  { value: "hailstorm", label: "Hailstorm" },
-  { value: "snowfall", label: "Snowfall" },
-  { value: "iceStorm", label: "Ice Storm" },
-  { value: "sleet", label: "Sleet" },
-  { value: "monsoonRain", label: "Monsoon Rain" },
-  { value: "tornado", label: "Tornado" },
-  { value: "cyclone", label: "Cyclone" },
-  { value: "hurricane", label: "Hurricane" },
-  { value: "typhoon", label: "Typhoon" },
-  { value: "galeForceWinds", label: "Gale-Force Winds" },
-  { value: "dustStorm", label: "Dust Storm" },
-  { value: "heatwave", label: "Heatwave (Extreme High Temperature)" },
-  { value: "coldWave", label: "Cold Wave (Extreme Low Temperature)" },
-  { value: "frost", label: "Frost" },
-  { value: "drought", label: "Drought (Prolonged dry conditions)" },
-  { value: "freezeEvent", label: "Freeze Event (Unseasonal frost)" },
-  { value: "thunderstorm", label: "Thunderstorm" },
-  { value: "lightningStrike", label: "Lightning Strike" },
-  { value: "windstorm", label: "Windstorm" },
-  { value: "severeTropicalStorm", label: "Severe Tropical Storm" },
-  { value: "sandstorm", label: "Sandstorm" },
-  { value: "landslide", label: "Landslide" },
-  { value: "mudslide", label: "Mudslide" },
-  { value: "earthquake", label: "Earthquake" },
-  { value: "wildfire", label: "Wildfire" },
-  { value: "volcanicAshfall", label: "Volcanic Ashfall" },
-  { value: "pestInfestation", label: "Pest Infestation" },
-  { value: "soilErosion", label: "Soil Erosion" },
+  { value: "rainfall", label: "Rainfall Above", operator: "greaterThan" },
+  { value: "temperature", label: "Temperature Below", operator: "lessThan" },
+  { value: "heavyRainfall", label: "Heavy Rainfall", operator: "greaterThan" },
+  { value: "flooding", label: "Flooding", operator: "greaterThan" },
+  { value: "hailstorm", label: "Hailstorm", operator: "greaterThan" },
+  { value: "snowfall", label: "Snowfall", operator: "greaterThan" },
+  { value: "iceStorm", label: "Ice Storm", operator: "greaterThan" },
+  { value: "sleet", label: "Sleet", operator: "greaterThan" },
+  { value: "monsoonRain", label: "Monsoon Rain", operator: "greaterThan" },
+  { value: "tornado", label: "Tornado", operator: "greaterThan" },
+  { value: "cyclone", label: "Cyclone", operator: "greaterThan" },
+  { value: "hurricane", label: "Hurricane", operator: "greaterThan" },
+  { value: "typhoon", label: "Typhoon", operator: "greaterThan" },
+  {
+    value: "galeForceWinds",
+    label: "Gale-Force Winds",
+    operator: "greaterThan",
+  },
+  { value: "dustStorm", label: "Dust Storm", operator: "greaterThan" },
+  {
+    value: "heatwave",
+    label: "Heatwave (Extreme High Temperature)",
+    operator: "greaterThan",
+  },
+  {
+    value: "coldWave",
+    label: "Cold Wave (Extreme Low Temperature)",
+    operator: "lessThan",
+  },
+  { value: "frost", label: "Frost", operator: "lessThan" },
+  {
+    value: "drought",
+    label: "Drought (Prolonged dry conditions)",
+    operator: "lessThan",
+  },
+  {
+    value: "freezeEvent",
+    label: "Freeze Event (Unseasonal frost)",
+    operator: "lessThan",
+  },
+  { value: "thunderstorm", label: "Thunderstorm", operator: "greaterThan" },
+  {
+    value: "lightningStrike",
+    label: "Lightning Strike",
+    operator: "greaterThan",
+  },
+  { value: "windstorm", label: "Windstorm", operator: "greaterThan" },
+  {
+    value: "severeTropicalStorm",
+    label: "Severe Tropical Storm",
+    operator: "greaterThan",
+  },
+  { value: "sandstorm", label: "Sandstorm", operator: "greaterThan" },
+  { value: "landslide", label: "Landslide", operator: "greaterThan" },
+  { value: "mudslide", label: "Mudslide", operator: "greaterThan" },
+  { value: "earthquake", label: "Earthquake", operator: "greaterThan" },
+  { value: "wildfire", label: "Wildfire", operator: "greaterThan" },
+  {
+    value: "volcanicAshfall",
+    label: "Volcanic Ashfall",
+    operator: "greaterThan",
+  },
+  {
+    value: "pestInfestation",
+    label: "Pest Infestation",
+    operator: "greaterThan",
+  },
+  { value: "soilErosion", label: "Soil Erosion", operator: "greaterThan" },
 ];
 
 const dummyPremiumResponse = (policyId: string): PremiumQuote => ({
@@ -75,6 +113,7 @@ function CreatePolicy({
   const [weatherCondition, setWeatherCondition] = useState<{
     value: string;
     label: string;
+    operator: string;
   } | null>(null);
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
@@ -84,7 +123,7 @@ function CreatePolicy({
   const [premiumQuote, setPremiumQuote] = useState<PremiumQuote | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [useDummyResponse, setUseDummyResponse] = useState(true);
+  const [useDummyResponse, setUseDummyResponse] = useState(false);
   const [startTimestamp, setStartTimestamp] = useState<number>(0);
   const [endTimestamp, setEndTimestamp] = useState<number>(0);
 
@@ -167,15 +206,12 @@ function CreatePolicy({
                 startDate,
                 endDate,
                 premiumCurrency: "ETH",
-                maxCoverage: 0.05,
+                maxCoverage: 0.5,
                 coverageCurrency: "ETH",
                 weatherCondition: {
                   conditionType: weatherCondition?.value,
-                  threshold: `${threshold} ${weatherCondition?.value === "temperature" ? "celsius" : "mm"}`,
-                  operator:
-                    weatherCondition?.value === "rainfall"
-                      ? "greaterThan"
-                      : "lessThan",
+                  threshold: `${threshold} ${getThresholdUnit(weatherCondition?.value || "")}`,
+                  operator: weatherCondition?.operator || "greaterThan",
                 },
               },
             ],
@@ -203,11 +239,13 @@ function CreatePolicy({
 
   const getThresholdUnit = (conditionType: string) => {
     switch (conditionType) {
+      case "rainfall":
       case "heavyRainfall":
       case "flooding":
       case "snowfall":
       case "monsoonRain":
         return "mm";
+      case "temperature":
       case "heatwave":
       case "coldWave":
       case "freezeEvent":
@@ -372,7 +410,7 @@ function CreatePolicy({
                 <p className="text-red-500 text-sm mt-1">{errors.threshold}</p>
               )}
             </div>
-            <div className="flex items-center">
+            {/* <div className="flex items-center">
               <input
                 type="checkbox"
                 id="useDummyResponse"
@@ -386,7 +424,7 @@ function CreatePolicy({
               >
                 Use dummy response (for testing)
               </Label>
-            </div>
+            </div> */}
             <Button
               type="submit"
               disabled={isLoading}
@@ -448,13 +486,10 @@ function CreatePolicy({
                   weatherCondition={{
                     conditionType: weatherCondition?.value ?? "",
                     threshold: threshold,
-                    operator:
-                      weatherCondition?.value === "rainfall"
-                        ? "greaterThan"
-                        : "lessThan",
+                    operator: weatherCondition?.operator ?? "greaterThan",
                   }}
                   premium={parseEther(premiumQuote.calculatedPremium)}
-                  maxCoverage={parseEther("0.05")}
+                  maxCoverage={parseEther("0.5")}
                   startDate={startTimestamp}
                   endDate={endTimestamp}
                   onSuccess={() => {
