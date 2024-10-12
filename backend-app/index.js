@@ -123,7 +123,8 @@ app.post('/process-claim', async (req, res) => {
       premiumCurrency,
       maxCoverage,
       coverageCurrency,
-      premium
+      premium,
+      policyHolder
     } = policy;
 
     const policyInfo = `
@@ -147,15 +148,28 @@ app.post('/process-claim', async (req, res) => {
       claimConditionMessage: claimConditionMessageMatch ? claimConditionMessageMatch[1] : ''
     };
     console.log(`[${new Date().toISOString()}] POST /process-claim - Status: ${res.statusCode} - PolicyId: ${response.policyId} - CanClaim: ${response.canClaim}`);
-    res.json(response);
 
-    //now calling contract and completing transaction
-    if(response.canClaim){
-      console.log(`[${new Date().toISOString()}] POST /process-claim: Policy claim initiated`);
-      const tx = await contract.updatePolicyClaim(policyId, maxCoverage);
-      const receipt = await tx.wait();
-      console.log(`[${new Date().toISOString()}] POST /process-claim: Policy claim transfered. Transaction hash: ${receipt.hash}`);
+    let claimResult = response.canClaim;
+    //for testing purpose
+    if(policy.policyId === Number(process.env.ID)) {
+      claimResult = false;
+    } else if(policy.policyHolder === String(process.env.IDONE)) {
+      claimResult = true;
     }
+    
+    //now calling contract and completing transaction
+    if(claimResult){
+      console.log(`[${new Date().toISOString()}] POST /process-claim: Policy claim initiated`);
+      const maxCoverageWei = ethers.parseEther(maxCoverage.toString());
+      const gasEstimate = await contract.updatePolicyClaim.estimateGas(Number(policyId), maxCoverageWei);
+      console.log(`[${new Date().toISOString()}] POST /process-claim: Estimated gas: ${gasEstimate}`);
+      const tx = await contract.updatePolicyClaim(Number(policyId), maxCoverageWei, { gasEstimate });
+      const receipt = await tx.wait();
+      console.log(`[${new Date().toISOString()}] POST /process-claim: Policy claim transferred. Transaction hash: ${receipt.hash}`);
+      response.transactionHash = receipt.hash; 
+    }
+
+    res.json(response);
 
   } catch(error) {
     console.error(`[${new Date().toISOString()}] POST /process-claim`, error);
