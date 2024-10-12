@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { Umbrella, Thermometer } from "lucide-react";
-import React from "react";
-import { formatCurrency, Currency } from "src/helper";
+import React, { useState, useEffect } from "react";
+import { Currency } from "src/helper";
+import { currencies } from "src/constants";
 
 import { Button } from "../ui/button";
 import {
@@ -47,16 +48,80 @@ interface MyPoliciesProps {
   isSubmittingClaim: boolean;
 }
 
+async function getEthUsdPrice(): Promise<number> {
+  try {
+    const response = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
+    );
+    const data = await response.json();
+    return data.ethereum.usd;
+  } catch (error) {
+    console.error(
+      "MyPolicies: Failed to fetch ETH price, using fallback value",
+      error
+    );
+    return 2460; // fallback
+  }
+}
+
 function MyPolicies({
   selectedCurrency,
   setCurrentView,
-  setShowClaimForm,
-  showClaimForm,
   policies,
   setSelectedPolicy,
   handleSubmitClaim,
   isSubmittingClaim,
 }: MyPoliciesProps) {
+  const [ethUsdPrice, setEthUsdPrice] = useState<number>(2000);
+
+  useEffect(() => {
+    getEthUsdPrice().then(setEthUsdPrice);
+  }, []);
+
+  const convertWeiToSelectedCurrency = (
+    weiAmount: bigint,
+    selectedCurrency: Currency
+  ): string => {
+    console.log(
+      `MyPolicies: Converting ${weiAmount} wei to ${selectedCurrency.code}`
+    );
+
+    // convert wei to ETH
+    const ethAmount = Number(weiAmount) / 1e18;
+    console.log(`MyPolicies: Converted to ${ethAmount} ETH`);
+
+    // convert ETH to USD using the fetched or fallback price
+    const usdAmount = ethAmount * ethUsdPrice;
+    console.log(
+      `MyPolicies: Converted to ${usdAmount} USD (ETH price: $${ethUsdPrice})`
+    );
+
+    // find the selected currency's rate
+    const currencyRate =
+      currencies.find((c) => c.code === selectedCurrency.code)?.rate || 1;
+    console.log(
+      `MyPolicies: Using exchange rate of ${currencyRate} for ${selectedCurrency.code}`
+    );
+
+    // convert USD to the selected currency
+    const convertedAmount = usdAmount * currencyRate;
+    console.log(
+      `MyPolicies: Converted to ${convertedAmount} ${selectedCurrency.code}`
+    );
+
+    // format the number
+    const formattedAmount = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: selectedCurrency.code,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(convertedAmount);
+
+    console.log(`MyPolicies: Final formatted amount: ${formattedAmount}`);
+
+    return formattedAmount;
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -107,7 +172,10 @@ function MyPolicies({
               <p className="text-lg font-semibold text-gray-700">
                 Coverage:{" "}
                 <span className="text-blue-600">
-                  {formatCurrency(policy.maxCoverage, selectedCurrency)}
+                  {convertWeiToSelectedCurrency(
+                    policy.maxCoverage,
+                    selectedCurrency
+                  )}
                 </span>
               </p>
               <p className="text-lg font-semibold text-gray-700">

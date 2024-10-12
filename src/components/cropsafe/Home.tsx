@@ -12,7 +12,6 @@ import Dashboard from "./Dashboard";
 import CreatePolicy from "./CreatePolicy";
 import MyPolicies from "./MyPolicies";
 import PolicyDetails from "./PolicyDetails";
-import ClaimStatus from "./ClaimStatus";
 import FAQs from "./FAQs";
 import {
   Card,
@@ -181,14 +180,6 @@ export default function CropSafe() {
     />
   );
 
-  const renderClaimStatus = () => (
-    <ClaimStatus
-      selectedCurrency={selectedCurrency}
-      setCurrentView={setCurrentView}
-      setShowClaimForm={setShowClaimForm}
-    />
-  );
-
   const renderFAQs = () => <FAQs />;
 
   const handleSubmitClaim = async (policy: Policy) => {
@@ -250,7 +241,7 @@ export default function CropSafe() {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-gray-800">
-            Claim Status
+            Claim Status (Powered by AI)
           </DialogTitle>
         </DialogHeader>
         {claimResponse && (
@@ -305,7 +296,6 @@ export default function CropSafe() {
               {currentView === "createPolicy" && renderCreatePolicy()}
               {currentView === "myPolicies" && renderMyPolicies()}
               {currentView === "policyDetails" && renderPolicyDetails()}
-              {currentView === "claimStatus" && renderClaimStatus()}
               {renderClaimResponse()}
             </>
           )}

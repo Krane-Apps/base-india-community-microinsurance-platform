@@ -25,8 +25,36 @@ interface PremiumQuote {
 }
 
 const weatherOptions = [
-  { value: "rainfall", label: "Rainfall above" },
-  { value: "temperature", label: "Temperature below" },
+  { value: "heavyRainfall", label: "Heavy Rainfall" },
+  { value: "flooding", label: "Flooding" },
+  { value: "hailstorm", label: "Hailstorm" },
+  { value: "snowfall", label: "Snowfall" },
+  { value: "iceStorm", label: "Ice Storm" },
+  { value: "sleet", label: "Sleet" },
+  { value: "monsoonRain", label: "Monsoon Rain" },
+  { value: "tornado", label: "Tornado" },
+  { value: "cyclone", label: "Cyclone" },
+  { value: "hurricane", label: "Hurricane" },
+  { value: "typhoon", label: "Typhoon" },
+  { value: "galeForceWinds", label: "Gale-Force Winds" },
+  { value: "dustStorm", label: "Dust Storm" },
+  { value: "heatwave", label: "Heatwave (Extreme High Temperature)" },
+  { value: "coldWave", label: "Cold Wave (Extreme Low Temperature)" },
+  { value: "frost", label: "Frost" },
+  { value: "drought", label: "Drought (Prolonged dry conditions)" },
+  { value: "freezeEvent", label: "Freeze Event (Unseasonal frost)" },
+  { value: "thunderstorm", label: "Thunderstorm" },
+  { value: "lightningStrike", label: "Lightning Strike" },
+  { value: "windstorm", label: "Windstorm" },
+  { value: "severeTropicalStorm", label: "Severe Tropical Storm" },
+  { value: "sandstorm", label: "Sandstorm" },
+  { value: "landslide", label: "Landslide" },
+  { value: "mudslide", label: "Mudslide" },
+  { value: "earthquake", label: "Earthquake" },
+  { value: "wildfire", label: "Wildfire" },
+  { value: "volcanicAshfall", label: "Volcanic Ashfall" },
+  { value: "pestInfestation", label: "Pest Infestation" },
+  { value: "soilErosion", label: "Soil Erosion" },
 ];
 
 const dummyPremiumResponse = (policyId: string): PremiumQuote => ({
@@ -173,6 +201,25 @@ function CreatePolicy({
     }
   };
 
+  const getThresholdUnit = (conditionType: string) => {
+    switch (conditionType) {
+      case "heavyRainfall":
+      case "flooding":
+      case "snowfall":
+      case "monsoonRain":
+        return "mm";
+      case "heatwave":
+      case "coldWave":
+      case "freezeEvent":
+        return "°C";
+      case "galeForceWinds":
+      case "windstorm":
+        return "km/h";
+      default:
+        return "";
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -307,7 +354,9 @@ function CreatePolicy({
             </div>
             <div>
               <Label htmlFor="threshold" className="text-lg text-gray-700">
-                Threshold Value
+                Threshold Value{" "}
+                {weatherCondition &&
+                  `(${getThresholdUnit(weatherCondition.value)})`}
               </Label>
               <Input
                 id="threshold"
@@ -316,7 +365,7 @@ function CreatePolicy({
                   setThreshold(e.target.value);
                   setErrors((prev) => ({ ...prev, threshold: "" }));
                 }}
-                placeholder="e.g., 10 mm"
+                placeholder={`e.g., 10 ${weatherCondition ? getThresholdUnit(weatherCondition.value) : ""}`}
                 className="mt-1"
               />
               {errors.threshold && (
