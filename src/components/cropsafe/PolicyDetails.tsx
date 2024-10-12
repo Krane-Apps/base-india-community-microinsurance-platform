@@ -48,6 +48,8 @@ interface PolicyDetailsProps {
   };
   policy: Policy | null;
   setCurrentView: (view: string) => void;
+  handleSubmitClaim: (policy: Policy) => void;
+  isSubmittingClaim: boolean;
 }
 
 // hardcoded exchange rates
@@ -58,6 +60,8 @@ function PolicyDetails({
   selectedCurrency,
   policy,
   setCurrentView,
+  handleSubmitClaim,
+  isSubmittingClaim,
 }: PolicyDetailsProps) {
   const formatCurrency = (amount: number, currencyCode: string) => {
     return new Intl.NumberFormat("en-US", {
@@ -182,11 +186,15 @@ function PolicyDetails({
         </CardContent>
         <CardFooter className="bg-gray-50 p-4">
           <Button
-            onClick={() => setShowClaimForm(true)}
+            onClick={() => handleSubmitClaim(policy)}
             className="w-full bg-blue-600 hover:bg-blue-700 transition-colors duration-300"
-            disabled={!policy.isActive || policy.isClaimed}
+            disabled={!policy.isActive || policy.isClaimed || isSubmittingClaim}
           >
-            {policy.isClaimed ? "Claim Already Filed" : "File a Claim"}
+            {policy.isClaimed
+              ? "Claim Already Filed"
+              : isSubmittingClaim
+                ? "Submitting..."
+                : "File a Claim"}
           </Button>
         </CardFooter>
       </Card>

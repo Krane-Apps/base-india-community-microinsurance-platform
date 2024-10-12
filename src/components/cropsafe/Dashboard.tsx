@@ -1,12 +1,33 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { motion } from "framer-motion";
-import { PlusCircle, FileText, AlertCircle } from "lucide-react";
+import { PlusCircle, FileText, AlertCircle, Copy, Check } from "lucide-react";
 import { formatCurrency } from "src/helper";
 import { Button } from "../ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 
-function Dashboard({ setCurrentView, basename, selectedCurrency }: any) {
+interface DashboardProps {
+  setCurrentView: (view: string) => void;
+  basename: string;
+  selectedCurrency: any;
+  address: string;
+}
+
+function Dashboard({
+  setCurrentView,
+  basename,
+  selectedCurrency,
+  address,
+}: DashboardProps) {
+  const [showCopied, setShowCopied] = useState(false);
+
+  const handleCopySuccess = () => {
+    setShowCopied(true);
+    console.log("[Dashboard.tsx] Address copied:", address);
+    setTimeout(() => setShowCopied(false), 2000);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -15,9 +36,32 @@ function Dashboard({ setCurrentView, basename, selectedCurrency }: any) {
       transition={{ duration: 0.5 }}
       className="p-4 md:p-6 max-w-4xl mx-auto"
     >
-      <h2 className="dashboard-welcome text-xl font-bold mb-6 text-gray-800">
-        Welcome, {basename}!
-      </h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="dashboard-welcome text-xl font-bold text-gray-800">
+          Welcome, {basename}!
+        </h2>
+        {(address || basename) && (
+          <CopyToClipboard
+            text={address ?? basename}
+            onCopy={handleCopySuccess}
+          >
+            <Button
+              variant="outline"
+              className="copy-button flex items-center"
+              title="Copy address"
+            >
+              {showCopied ? (
+                <Check className="h-4 w-4 mr-2 text-green-600" />
+              ) : (
+                <Copy className="h-4 w-4 mr-2 text-gray-600" />
+              )}
+              <span className="text-sm">
+                {address.slice(0, 6)}...{address.slice(-4)}
+              </span>
+            </Button>
+          </CopyToClipboard>
+        )}
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <Button
           onClick={() => setCurrentView("createPolicy")}
@@ -54,7 +98,7 @@ function Dashboard({ setCurrentView, basename, selectedCurrency }: any) {
               <p className="text-lg font-semibold text-gray-700">
                 Total Coverage:{" "}
                 <span className="text-blue-600">
-                  {formatCurrency(20000, selectedCurrency)}
+                  {formatCurrency(BigInt("20000"), selectedCurrency)}
                 </span>
               </p>
             </div>

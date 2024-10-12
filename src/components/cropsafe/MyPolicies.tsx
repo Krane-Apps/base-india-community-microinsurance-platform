@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Umbrella, Thermometer } from "lucide-react";
 import React from "react";
-import { formatCurrency } from "src/helper";
+import { formatCurrency, Currency } from "src/helper";
 
 import { Button } from "../ui/button";
 import {
@@ -37,12 +37,14 @@ interface Policy {
 }
 
 interface MyPoliciesProps {
-  selectedCurrency: string;
+  selectedCurrency: Currency;
   setCurrentView: (view: string) => void;
   setShowClaimForm: (show: boolean) => void;
   showClaimForm: boolean;
   policies: Policy[];
   setSelectedPolicy: (policy: Policy) => void;
+  handleSubmitClaim: (policy: Policy) => void;
+  isSubmittingClaim: boolean;
 }
 
 function MyPolicies({
@@ -52,6 +54,8 @@ function MyPolicies({
   showClaimForm,
   policies,
   setSelectedPolicy,
+  handleSubmitClaim,
+  isSubmittingClaim,
 }: MyPoliciesProps) {
   return (
     <motion.div
@@ -103,10 +107,7 @@ function MyPolicies({
               <p className="text-lg font-semibold text-gray-700">
                 Coverage:{" "}
                 <span className="text-blue-600">
-                  {formatCurrency(
-                    Number(policy.maxCoverage) / 1e18,
-                    selectedCurrency
-                  )}
+                  {formatCurrency(policy.maxCoverage, selectedCurrency)}
                 </span>
               </p>
               <p className="text-lg font-semibold text-gray-700">
@@ -128,11 +129,17 @@ function MyPolicies({
                   View Details
                 </Button>
                 <Button
-                  onClick={() => setShowClaimForm(true)}
+                  onClick={() => handleSubmitClaim(policy)}
                   className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 transition-colors duration-300"
-                  disabled={!policy.isActive || policy.isClaimed}
+                  disabled={
+                    !policy.isActive || policy.isClaimed || isSubmittingClaim
+                  }
                 >
-                  {policy.isClaimed ? "Claim Filed" : "File a Claim"}
+                  {policy.isClaimed
+                    ? "Claim Filed"
+                    : isSubmittingClaim
+                      ? "Submitting..."
+                      : "File a Claim"}
                 </Button>
               </div>
             </CardFooter>

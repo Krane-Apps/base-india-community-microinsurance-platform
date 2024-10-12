@@ -1,5 +1,4 @@
-import { address } from "framer-motion/client";
-import { Home, Menu } from "lucide-react";
+import { Home } from "lucide-react";
 import React from "react";
 import { currencies } from "src/constants";
 import LoginButton from "../LoginButton";
@@ -7,13 +6,23 @@ import { Button } from "../ui/button";
 import Image from "next/image";
 import Select from "react-select";
 
+interface HeaderProps {
+  isLoggedIn: boolean;
+  setCurrentView: (view: string) => void;
+  selectedCurrency: any;
+  setSelectedCurrency: (currency: any) => void;
+  basename: string;
+  address: string;
+}
+
 function Header({
   isLoggedIn,
   setCurrentView,
   selectedCurrency,
   setSelectedCurrency,
   basename,
-}: any) {
+  address,
+}: HeaderProps) {
   const currencyOptions = currencies.map((currency) => ({
     value: currency.code,
     label: `${currency.symbol} ${currency.code}`,

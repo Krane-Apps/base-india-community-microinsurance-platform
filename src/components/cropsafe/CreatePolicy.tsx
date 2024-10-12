@@ -139,7 +139,7 @@ function CreatePolicy({
                 startDate,
                 endDate,
                 premiumCurrency: "ETH",
-                maxCoverage: 20,
+                maxCoverage: 0.05,
                 coverageCurrency: "ETH",
                 weatherCondition: {
                   conditionType: weatherCondition?.value,
@@ -156,11 +156,18 @@ function CreatePolicy({
         response = apiResponse.data;
       }
 
-      console.log(response);
-      setPremiumQuote(response);
+      console.log("CreatePolicy: API response", response);
+
+      // parse the calculatedPremium string to extract the numeric value
+      const premiumValue = parseFloat(response.calculatedPremium.split(" ")[0]);
+
+      setPremiumQuote({
+        ...response,
+        calculatedPremium: premiumValue.toString(), // store as string for consistency
+      });
       setShowPremiumQuote(true);
     } catch (error) {
-      console.error("Error calculating premium:", error);
+      console.error("CreatePolicy: Error calculating premium:", error);
     } finally {
       setIsLoading(false);
     }
@@ -352,7 +359,7 @@ function CreatePolicy({
             </button>
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold text-gray-800">
-                Premium Quote
+                Premium Quote (Powered by AI)
               </DialogTitle>
             </DialogHeader>
             {premiumQuote && (
@@ -370,7 +377,7 @@ function CreatePolicy({
                 <p className="text-lg font-semibold text-gray-700">
                   Calculated Premium:{" "}
                   <span className="text-green-600">
-                    {premiumQuote.calculatedPremium}
+                    {premiumQuote.calculatedPremium} ETH
                   </span>
                 </p>
                 <p className="text-lg font-semibold text-gray-700">
@@ -398,7 +405,7 @@ function CreatePolicy({
                         : "lessThan",
                   }}
                   premium={parseEther(premiumQuote.calculatedPremium)}
-                  maxCoverage={parseEther("20")}
+                  maxCoverage={parseEther("0.05")}
                   startDate={startTimestamp}
                   endDate={endTimestamp}
                   onSuccess={() => {
