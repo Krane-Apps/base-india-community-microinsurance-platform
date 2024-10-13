@@ -137,8 +137,10 @@ app.post('/process-claim', async (req, res) => {
       Premium: ${premium}
     `;
     console.log(`[${new Date().toISOString()}] POST /process-claim - Received: ${policyInfo}`);
- 
-    const aiResponse = await generateAnthropicResponse(`${policyInfo} ${claimPrompt}`, res);
+
+    const historicalWeatherData = await fetchHistoricalWeather(location.latitude, location.longitude, startDate, endDate);
+
+    const aiResponse = await generateAnthropicResponse(`${policyInfo} ${claimPrompt} ${JSON.stringify(historicalWeatherData)}`, res);
     const canClaimMatch = aiResponse.match(/canClaim:\s*(true|false)/);
     const claimConditionMessageMatch = aiResponse.match(/claimConditionMessage:\s*"([^"]*)"/);
 
@@ -148,17 +150,9 @@ app.post('/process-claim', async (req, res) => {
       claimConditionMessage: claimConditionMessageMatch ? claimConditionMessageMatch[1] : ''
     };
     console.log(`[${new Date().toISOString()}] POST /process-claim - Status: ${res.statusCode} - PolicyId: ${response.policyId} - CanClaim: ${response.canClaim}`);
-
-    let claimResult = response.canClaim;
-    //for testing purpose
-    if(policy.policyId === Number(process.env.ID)) {
-      claimResult = false;
-    } else if(policy.policyHolder === String(process.env.IDONE)) {
-      claimResult = true;
-    }
     
     //now calling contract and completing transaction
-    if(claimResult){
+    if(response.canClaim){
       console.log(`[${new Date().toISOString()}] POST /process-claim: Policy claim initiated`);
       const maxCoverageWei = ethers.parseEther(maxCoverage.toString());
       const gasEstimate = await contract.updatePolicyClaim.estimateGas(Number(policyId), maxCoverageWei);
@@ -221,6 +215,31 @@ async function fetchWeatherForecast(lat, lon) {
   return parsedForecast;
 }
 
+async function fetchHistoricalWeather(lat, lon, startDate, endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const weatherData = [];
+
+  for (let date = start; date <= end; date.setDate(date.getDate() + 1)) {
+    const formattedDate = date.toISOString().split('T')[0];
+    const url = `https://www.meteosource.com/api/v1/flexi/time_machine?lat=${lat}&lon=${lon}&date=${formattedDate}&timezone=UTC&units=metric&key=${weatherApiKey}`;
+    
+    try {
+      const response = await axios.get(url);
+      const dailyData = response.data.daily;
+
+      weatherData.push({
+        date: dailyData.day,
+        avgTemp: dailyData.statistics.temperature.avg,
+        avgWindSpeed: dailyData.statistics.wind.avg_spee,
+        avgPrecipitation: dailyData.statistics.precipitation.avg,
+        weather: dailyData.weather
+      });
+    } catch (error) {
+      console.error(`Error fetching weather data for ${formattedDate}:`, error);
+    }
+  }
+}
 
 /*
 PROMPTS
