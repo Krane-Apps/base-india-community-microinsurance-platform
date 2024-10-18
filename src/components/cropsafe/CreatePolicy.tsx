@@ -206,7 +206,7 @@ function CreatePolicy({
                 startDate,
                 endDate,
                 premiumCurrency: "ETH",
-                maxCoverage: 0.5,
+                maxCoverage: 0.005,
                 coverageCurrency: "ETH",
                 weatherCondition: {
                   conditionType: weatherCondition?.value,
@@ -489,7 +489,7 @@ function CreatePolicy({
                     operator: weatherCondition?.operator ?? "greaterThan",
                   }}
                   premium={parseEther(premiumQuote.calculatedPremium)}
-                  maxCoverage={parseEther("0.5")}
+                  maxCoverage={parseEther("0.005")}
                   startDate={startTimestamp}
                   endDate={endTimestamp}
                   onSuccess={() => {
