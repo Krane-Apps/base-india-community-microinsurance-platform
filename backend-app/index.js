@@ -13,7 +13,7 @@ app.use(express.json());
 CORS_CONFIG
 */
 const corsOptions = {
-  origin: 'https://cropsafe-base-sea-hackathon.vercel.app',
+  origin: 'https://cropsafe.vercel.app',
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
