@@ -138,9 +138,10 @@ app.post('/process-claim', async (req, res) => {
     `;
     console.log(`[${new Date().toISOString()}] POST /process-claim - Received: ${policyInfo}`);
 
-    const historicalWeatherData = await fetchHistoricalWeather(location.latitude, location.longitude, startDate, endDate);
+    // const historicalWeatherData = await fetchHistoricalWeather(location.latitude, location.longitude, startDate, endDate);
+    // const aiResponse = await generateAnthropicResponse(`${policyInfo} ${claimPrompt} ${JSON.stringify(historicalWeatherData)}`, res);
 
-    const aiResponse = await generateAnthropicResponse(`${policyInfo} ${claimPrompt} ${JSON.stringify(historicalWeatherData)}`, res);
+    const aiResponse = await generateAnthropicResponse(`${policyInfo} ${claimPrompt}`, res);
     const canClaimMatch = aiResponse.match(/canClaim:\s*(true|false)/);
     const claimConditionMessageMatch = aiResponse.match(/claimConditionMessage:\s*"([^"]*)"/);
 
