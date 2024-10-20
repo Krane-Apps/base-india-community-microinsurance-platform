@@ -1,4 +1,71 @@
+import { Step } from "react-joyride";
+
 export const BASE_CHAIN_ID = 8453;
+
+export const steps: Step[] = [
+  {
+    target: ".dashboard-welcome",
+    content:
+      "Welcome to CropSafe! This is your personalized dashboard where you can manage your crop insurance policies.",
+    disableBeacon: true,
+  },
+  {
+    target: ".create-policy-button",
+    content:
+      "Click here to create a new insurance policy for your crops. You can customize coverage based on specific weather conditions.",
+  },
+  {
+    target: ".view-policies-button",
+    content:
+      "Access and manage your existing policies here. You can view details, file claims, and track policy status.",
+  },
+  {
+    target: ".policy-summary",
+    content:
+      "This card provides a quick overview of your active policies and any pending claims.",
+  },
+  {
+    target: ".header-logo",
+    content:
+      "You can always return to the dashboard by clicking on the CropSafe logo.",
+  },
+  {
+    target: ".user-profile",
+    content:
+      "Your user profile is displayed here. It shows your Base account name.",
+  },
+  {
+    target: ".home-button",
+    content:
+      "Use this button to quickly navigate back to the dashboard from any page.",
+  },
+  {
+    target: ".mobile-menu-button",
+    content:
+      "On smaller screens, you can access the menu options by clicking this button.",
+  },
+  {
+    target: ".policy-card",
+    content:
+      "Each policy is represented by a card. You can view details or file claims for individual policies here.",
+  },
+  {
+    target: ".faq-section",
+    content:
+      "Find quick answers to common questions in our FAQ section. Click on a question to reveal its answer.",
+  },
+  {
+    target: ".currency-selector",
+    content:
+      "You can change the display currency here. All amounts will be converted to your selected currency.",
+  },
+  {
+    target: "body",
+    placement: "center",
+    content:
+      "That concludes our tour! Feel free to explore CropSafe and secure your crops against unpredictable weather conditions.",
+  },
+];
 
 export const currencies = [
   { code: "USD", name: "US Dollar", symbol: "$", rate: 1 },
