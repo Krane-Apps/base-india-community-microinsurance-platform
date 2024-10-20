@@ -179,6 +179,7 @@ export default function CropSafe() {
       selectedLanguage={selectedLanguage}
       selectedCurrency={selectedCurrency}
       address={address ?? ""}
+      policies={policies}
     />
   );
 
