@@ -1,64 +1,67 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/coinbase/onchainkit/main/site/docs/public/logo/v0-27.png">
-    <img alt="OnchainKit logo vibes" src="https://raw.githubusercontent.com/coinbase/onchainkit/main/site/docs/public/logo/v0-27.png" width="auto">
-  </picture>
-</p>
+# CropSafe - Weather-Based Crop Insurance on Base
 
-# Onchain App Template
+Smart Contract: [0x7a92034f9fE2a58fEc209830CeACf250bD356A44](https://basescan.org/address/0x7a92034f9fE2a58fEc209830CeACf250bD356A44)
 
-An Onchain App Template build with [OnchainKit](https://onchainkit.xyz), and ready to be deployed to Vercel.
+<video src="https://github.com/user-attachments/assets/086de65e-2859-4a69-8b78-228e9d05df4a" autoplay loop muted playsinline></video>
 
-Play with it live on https://onchain-app-template.vercel.app
+## Overview 🌐
 
-Have fun! ⛵️
+CropSafe is a decentralized application (dApp) built on the Base blockchain, offering weather-based crop insurance for farmers and agricultural businesses in Southeast Asia. It utilizes smart contracts to automate policy creation, premium calculations, and claim processing based on real-time weather data.
 
-<br />
+## Features 🚀
 
-## Setup
+- Create customized insurance policies based on specific weather conditions
+- AI-powered premium calculation
+- Automated claim processing using oracle-fed weather data
+- Multi-language support for Southeast Asian countries
+- Integration with Base blockchain for transparent and secure transactions
 
-To ensure all components work seamlessly, set the following environment variables in your `.env` file using `.env.local.example` as a reference.
+## Technology Stack 💻
 
-You can find the API key on the [Coinbase Developer Portal's OnchainKit page](https://portal.cdp.coinbase.com/products/onchainkit). If you don't have an account, you will need to create one. 
+- Frontend: Next.js, React
+- Blockchain: Base (Ethereum L2)
+- Smart Contracts: Solidity
+- Styling: Tailwind CSS
+- State Management: React Hooks
+- Blockchain Interaction: ethers.js
+- Weather Data: External Oracle (to be implemented)
 
-You can find your Wallet Connector project ID at [Wallet Connect](https://cloud.walletconnect.com).
+## Getting Started 🚀
 
-```sh
-# See https://portal.cdp.coinbase.com/products/onchainkit
-NEXT_PUBLIC_CDP_API_KEY="GET_FROM_COINBASE_DEVELOPER_PLATFORM"
+1. Clone the repository
 
-# See https://cloud.walletconnect.com
-NEXT_PUBLIC_WC_PROJECT_ID="GET_FROM_WALLET_CONNECT"
-```
-<br />
+   ```
+   git clone https://github.com/bluntbrain/cropsafe-base-sea-hackathon.git
+   ```
 
-## Locally run
+2. Install dependencies
 
-```sh
-# Install bun in case you don't have it
-curl -fsSL https://bun.sh/install | bash
+   ```
+   npm install
+   ```
 
-# Install packages
-bun i
+3. Set up environment variables (copy `.env.example` to `.env.local` and fill in the values)
 
-# Run Next app
-bun run dev
-```
-<br />
+4. Run the development server
 
-## Resources
+   ```
+   npm run dev
+   ```
 
-- [OnchainKit documentation](https://onchainkit.xyz)
-- We use the [OnchainKit Early Adopter](https://github.com/neodaoist/onchainkit-early-adopter) contract written by neodaoist [[X]](https://x.com/neodaoist)
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-<br />
+## Contributing 🤝
 
-## License
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## License 📄
 
-## Need more help?
+This project is licensed under the MIT License.
 
-If you have any questions or need help, feel free to reach out to us on [Discord](https://discord.gg/8gW3h6w5) 
-or open a [Github issue](https://github.com/coinbase/onchainkit/issues) or DMs us 
-on X at [@onchainkit](https://x.com/onchainkit), [@zizzamia](https://x.com/zizzamia), [@fkpxls](https://x.com/fkpxls).
+## Acknowledgements 🌟
+
+- Base blockchain team for providing the infrastructure
+- OpenAI for powering our AI-based premium calculations
+- All contributors and supporters of the CropSafe project
+
+For more information, visit our [project submission on Devfolio](https://devfolio.co/projects/crop-safe-795d).
