@@ -111,7 +111,7 @@ function PolicyDetails({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5 }}
-      className="p-4 md:p-6 max-w-4xl mx-auto"
+      className="p-4 sm:p-6 w-full"
     >
       <h2 className="text-3xl font-bold mb-6 text-gray-800">Policy Details</h2>
       <Card className="bg-white shadow-xl rounded-lg overflow-hidden">

@@ -29,6 +29,7 @@ import {
 import CurrencyPopup from "./CurrencyPopup";
 import Header from "./Header";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dailog";
+import { translations, getLanguageByCountry } from "src/locales/translations";
 
 interface Policy {
   policyId: bigint;
@@ -53,6 +54,8 @@ interface Policy {
   updatedAt: bigint;
 }
 
+type LanguageCode = keyof typeof translations;
+
 export default function CropSafe() {
   const { address } = useAccount();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -68,6 +71,7 @@ export default function CropSafe() {
   const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null);
   const [claimResponse, setClaimResponse] = useState<any>(null);
   const [isSubmittingClaim, setIsSubmittingClaim] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>("en");
 
   const { data: policyData } = useContractRead({
     address: createPolicyContractAddress,
@@ -100,6 +104,27 @@ export default function CropSafe() {
     }
   }, [isLoggedIn]);
 
+  useEffect(() => {
+    // Set initial language based on selected currency
+    if (selectedCurrency) {
+      const countryCode = selectedCurrency.code.slice(0, 2);
+      const initialLanguage = getLanguageByCountry(countryCode);
+      setSelectedLanguage(initialLanguage as LanguageCode);
+    }
+  }, [selectedCurrency]);
+
+  useEffect(() => {
+    const warmUpBackend = async () => {
+      try {
+        await axios.get("https://cropsafe-base-sea-hackathon.onrender.com");
+        console.log("Backend warmed up successfully");
+      } catch (error) {
+        console.error("Error warming up backend:", error);
+      }
+    };
+    warmUpBackend();
+  }, []);
+
   const handleJoyrideCallback = (data: any) => {
     const { status } = data;
     if (status === "finished") {
@@ -122,6 +147,8 @@ export default function CropSafe() {
       setCurrentView={setCurrentView}
       selectedCurrency={selectedCurrency}
       setSelectedCurrency={setSelectedCurrency}
+      selectedLanguage={selectedLanguage}
+      setSelectedLanguage={setSelectedLanguage}
       basename={basename}
       address={address ?? ""}
     />
@@ -142,6 +169,7 @@ export default function CropSafe() {
     <Dashboard
       setCurrentView={setCurrentView}
       basename={basename}
+      selectedLanguage={selectedLanguage}
       selectedCurrency={selectedCurrency}
       address={address ?? ""}
     />
@@ -180,7 +208,7 @@ export default function CropSafe() {
     />
   );
 
-  const renderFAQs = () => <FAQs />;
+  const renderFAQs = () => <FAQs selectedLanguage={selectedLanguage} />;
 
   const handleSubmitClaim = async (policy: Policy) => {
     setIsSubmittingClaim(true);
@@ -261,45 +289,47 @@ export default function CropSafe() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-blue-50 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-green-50 to-blue-50 flex flex-col w-full">
       {renderHeader()}
       {renderMobileMenu()}
       {renderCurrencyPopup()}
-      <main className="flex-grow">
-        <AnimatePresence mode="wait">
-          {!isLoggedIn ? (
-            <motion.div
-              key="login"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-              className="flex items-center justify-center h-full p-4"
-            >
-              <Card className="w-full max-w-md bg-white shadow-xl rounded-lg overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-green-400 to-blue-500 text-white">
-                  <CardTitle className="text-2xl">
-                    Welcome to CropSafe
-                  </CardTitle>
-                  <CardDescription className="text-gray-100">
-                    Login to access your weather insurance dashboard
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6">
-                  {!address && <LoginButton />}
-                </CardContent>
-              </Card>
-            </motion.div>
-          ) : (
-            <>
-              {currentView === "dashboard" && renderDashboard()}
-              {currentView === "createPolicy" && renderCreatePolicy()}
-              {currentView === "myPolicies" && renderMyPolicies()}
-              {currentView === "policyDetails" && renderPolicyDetails()}
-              {renderClaimResponse()}
-            </>
-          )}
-        </AnimatePresence>
+      <main className="flex-grow w-full">
+        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimatePresence mode="wait">
+            {!isLoggedIn ? (
+              <motion.div
+                key="login"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+                className="flex items-center justify-center h-full p-4"
+              >
+                <Card className="w-full max-w-md bg-white shadow-xl rounded-lg overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-green-400 to-blue-500 text-white">
+                    <CardTitle className="text-2xl">
+                      {translations[selectedLanguage].welcome}
+                    </CardTitle>
+                    <CardDescription className="text-gray-100">
+                      {translations[selectedLanguage].login}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    {!address && <LoginButton />}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ) : (
+              <>
+                {currentView === "dashboard" && renderDashboard()}
+                {currentView === "createPolicy" && renderCreatePolicy()}
+                {currentView === "myPolicies" && renderMyPolicies()}
+                {currentView === "policyDetails" && renderPolicyDetails()}
+                {renderClaimResponse()}
+              </>
+            )}
+          </AnimatePresence>
+        </div>
       </main>
       {isLoggedIn && renderFAQs()}
       <Joyride

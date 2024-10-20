@@ -35,6 +35,7 @@ interface TransactionWrapperProps {
   startDate: number;
   endDate: number;
   onSuccess: () => void;
+  paymasterAndBundlerEndpoint?: string;
 }
 
 export default function TransactionWrapper({
@@ -49,6 +50,7 @@ export default function TransactionWrapper({
   startDate,
   endDate,
   onSuccess,
+  paymasterAndBundlerEndpoint,
 }: TransactionWrapperProps) {
   const contracts = [
     {
@@ -91,6 +93,11 @@ export default function TransactionWrapper({
         chainId={BASE_SEPOLIA_CHAIN_ID}
         onError={handleError}
         onSuccess={handleSuccess}
+        capabilities={{
+          paymasterService: {
+            url: paymasterAndBundlerEndpoint as string,
+          },
+        }}
       >
         <TransactionButton
           className="mt-0 mr-auto ml-auto max-w-full text-[white]"

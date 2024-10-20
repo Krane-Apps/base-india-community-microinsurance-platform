@@ -102,6 +102,9 @@ const dummyPremiumResponse = (policyId: string): PremiumQuote => ({
   majorUpcomingEvents: "No major weather events forecasted",
 });
 
+const PAYMASTER_AND_BUNDLER_ENDPOINT =
+  process.env.NEXT_PUBLIC_PAYMASTER_AND_BUNDLER_ENDPOINT;
+
 function CreatePolicy({
   selectedCurrency,
   setCurrentView,
@@ -126,6 +129,7 @@ function CreatePolicy({
   const [useDummyResponse, setUseDummyResponse] = useState(false);
   const [startTimestamp, setStartTimestamp] = useState<number>(0);
   const [endTimestamp, setEndTimestamp] = useState<number>(0);
+  const [maxCoverage, setMaxCoverage] = useState("0.05");
 
   const { address } = useAccount();
 
@@ -171,6 +175,11 @@ function CreatePolicy({
     if (!weatherCondition)
       newErrors.weatherCondition = "Weather condition is required";
     if (!threshold.trim()) newErrors.threshold = "Threshold value is required";
+    if (!maxCoverage.trim())
+      newErrors.maxCoverage = "Maximum coverage is required";
+    if (isNaN(Number(maxCoverage)) || Number(maxCoverage) <= 0) {
+      newErrors.maxCoverage = "Maximum coverage must be a positive number";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -206,7 +215,7 @@ function CreatePolicy({
                 startDate,
                 endDate,
                 premiumCurrency: "ETH",
-                maxCoverage: 0.005,
+                maxCoverage: parseFloat(maxCoverage),
                 coverageCurrency: "ETH",
                 weatherCondition: {
                   conditionType: weatherCondition?.value,
@@ -264,13 +273,13 @@ function CreatePolicy({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5 }}
-      className="p-4 md:p-6 max-w-4xl mx-auto relative"
+      className="p-4 sm:p-6 w-full"
     >
       <h2 className="text-3xl font-bold mb-6 text-gray-800">
         Create New Policy
       </h2>
       <Card className="bg-white shadow-xl rounded-lg overflow-hidden">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <form onSubmit={calculatePremium} className="space-y-6">
             <div>
               <Label htmlFor="policyName" className="text-lg text-gray-700">
@@ -410,21 +419,28 @@ function CreatePolicy({
                 <p className="text-red-500 text-sm mt-1">{errors.threshold}</p>
               )}
             </div>
-            {/* <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="useDummyResponse"
-                checked={useDummyResponse}
-                onChange={(e) => setUseDummyResponse(e.target.checked)}
-                className="mr-2"
-              />
-              <Label
-                htmlFor="useDummyResponse"
-                className="text-sm text-gray-700"
-              >
-                Use dummy response (for testing)
+            <div>
+              <Label htmlFor="maxCoverage" className="text-lg text-gray-700">
+                Maximum Coverage (ETH)
               </Label>
-            </div> */}
+              <Input
+                id="maxCoverage"
+                type="number"
+                step="0.001"
+                value={maxCoverage}
+                onChange={(e) => {
+                  setMaxCoverage(e.target.value);
+                  setErrors((prev) => ({ ...prev, maxCoverage: "" }));
+                }}
+                placeholder="e.g., 0.005"
+                className="mt-1"
+              />
+              {errors.maxCoverage && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.maxCoverage}
+                </p>
+              )}
+            </div>
             <Button
               type="submit"
               disabled={isLoading}
@@ -489,13 +505,14 @@ function CreatePolicy({
                     operator: weatherCondition?.operator ?? "greaterThan",
                   }}
                   premium={parseEther(premiumQuote.calculatedPremium)}
-                  maxCoverage={parseEther("0.005")}
+                  maxCoverage={parseEther(maxCoverage)}
                   startDate={startTimestamp}
                   endDate={endTimestamp}
                   onSuccess={() => {
                     setShowPremiumQuote(false);
                     setCurrentView("myPolicies");
                   }}
+                  paymasterAndBundlerEndpoint={PAYMASTER_AND_BUNDLER_ENDPOINT}
                 />
               )}
             </div>
