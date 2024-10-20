@@ -14,6 +14,14 @@ import { Card, CardContent } from "../ui/card";
 import { Label } from "../ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dailog";
 import TransactionWrapper from "../TransactionWrapper";
+import {
+  translations,
+  TranslationKey,
+  getTranslation,
+  LanguageCode,
+} from "src/locales/translations";
+
+type LanguageKey = keyof typeof translations;
 
 const Map = dynamic(() => import("./Map"), { ssr: false });
 
@@ -111,6 +119,7 @@ function CreatePolicy({
   showPremiumQuote,
   setShowPremiumQuote,
   basename,
+  selectedLanguage,
 }: any) {
   const [policyName, setPolicyName] = useState("");
   const [weatherCondition, setWeatherCondition] = useState<{
@@ -132,6 +141,9 @@ function CreatePolicy({
   const [maxCoverage, setMaxCoverage] = useState("0.05");
 
   const { address } = useAccount();
+
+  const t = (key: TranslationKey) =>
+    getTranslation(selectedLanguage as LanguageCode, key);
 
   const handlePositionChange = (lat: number, lng: number) => {
     setLatitude(lat.toFixed(6));
@@ -276,14 +288,14 @@ function CreatePolicy({
       className="p-4 sm:p-6 w-full"
     >
       <h2 className="text-3xl font-bold mb-6 text-gray-800">
-        Create New Policy
+        {t("createPolicy")}
       </h2>
       <Card className="bg-white shadow-xl rounded-lg overflow-hidden">
         <CardContent className="p-4 sm:p-6">
           <form onSubmit={calculatePremium} className="space-y-6">
             <div>
               <Label htmlFor="policyName" className="text-lg text-gray-700">
-                Policy Name
+                {t("policyName")}
               </Label>
               <Input
                 id="policyName"
@@ -292,7 +304,7 @@ function CreatePolicy({
                   setPolicyName(e.target.value);
                   setErrors((prev) => ({ ...prev, policyName: "" }));
                 }}
-                placeholder="Enter policy name"
+                placeholder={t("enterPolicyName")}
                 className="mt-1"
               />
               {errors.policyName && (
@@ -300,7 +312,9 @@ function CreatePolicy({
               )}
             </div>
             <div>
-              <Label className="text-lg text-gray-700">Select Location</Label>
+              <Label className="text-lg text-gray-700">
+                {t("selectLocation")}
+              </Label>
               {!showPremiumQuote && (
                 <div className="h-96 mt-1 overflow-hidden rounded-lg">
                   <Map onPositionChange={handlePositionChange} />
@@ -310,7 +324,7 @@ function CreatePolicy({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="latitude" className="text-lg text-gray-700">
-                  Latitude
+                  {t("latitude")}
                 </Label>
                 <Input
                   id="latitude"
@@ -327,7 +341,7 @@ function CreatePolicy({
               </div>
               <div>
                 <Label htmlFor="longitude" className="text-lg text-gray-700">
-                  Longitude
+                  {t("longitude")}
                 </Label>
                 <Input
                   id="longitude"
@@ -347,7 +361,9 @@ function CreatePolicy({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-lg text-gray-700">Start Date</Label>
+                <Label className="text-lg text-gray-700">
+                  {t("startDate")}
+                </Label>
                 <Input
                   type="date"
                   value={startDate}
@@ -364,7 +380,7 @@ function CreatePolicy({
                 )}
               </div>
               <div>
-                <Label className="text-lg text-gray-700">End Date</Label>
+                <Label className="text-lg text-gray-700">{t("endDate")}</Label>
                 <Input
                   type="date"
                   value={endDate}
@@ -381,7 +397,7 @@ function CreatePolicy({
             </div>
             <div>
               <Label className="text-lg text-gray-700">
-                Weather Trigger Condition
+                {t("weatherTriggerCondition")}
               </Label>
               <Select
                 value={weatherCondition}
@@ -390,7 +406,7 @@ function CreatePolicy({
                   setErrors((prev) => ({ ...prev, weatherCondition: "" }));
                 }}
                 options={weatherOptions}
-                placeholder="Select condition"
+                placeholder={t("selectCondition")}
                 className="mt-1"
               />
               {errors.weatherCondition && (
@@ -401,7 +417,7 @@ function CreatePolicy({
             </div>
             <div>
               <Label htmlFor="threshold" className="text-lg text-gray-700">
-                Threshold Value{" "}
+                {t("thresholdValue")}{" "}
                 {weatherCondition &&
                   `(${getThresholdUnit(weatherCondition.value)})`}
               </Label>
@@ -421,7 +437,7 @@ function CreatePolicy({
             </div>
             <div>
               <Label htmlFor="maxCoverage" className="text-lg text-gray-700">
-                Maximum Coverage (ETH)
+                {t("maximumCoverage")} (ETH)
               </Label>
               <Input
                 id="maxCoverage"
@@ -446,7 +462,7 @@ function CreatePolicy({
               disabled={isLoading}
               className="w-full bg-green-600 hover:bg-green-700 transition-colors duration-300"
             >
-              {isLoading ? "Calculating..." : "Calculate Premium"}
+              {isLoading ? t("calculating") : t("calculatePremium")}
             </Button>
           </form>
         </CardContent>
@@ -462,29 +478,29 @@ function CreatePolicy({
             </button>
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold text-gray-800">
-                Premium Quote (Powered by AI)
+                {t("createPolicyDialogTitle")}
               </DialogTitle>
             </DialogHeader>
             {premiumQuote && (
               <div className="space-y-4 mt-4">
                 <p className="text-lg font-semibold text-gray-700">
-                  Policy ID:{" "}
+                  {t("createPolicyDialogPolicyId")}:{" "}
                   <span className="text-blue-600">{premiumQuote.policyId}</span>
                 </p>
                 <p className="text-lg font-semibold text-gray-700">
-                  Risk Factor:{" "}
+                  {t("createPolicyDialogRiskFactor")}:{" "}
                   <span className="text-orange-600">
                     {(premiumQuote.riskFactor * 100).toFixed(2)}%
                   </span>
                 </p>
                 <p className="text-lg font-semibold text-gray-700">
-                  Calculated Premium:{" "}
+                  {t("createPolicyDialogCalculatedPremium")}:{" "}
                   <span className="text-green-600">
                     {premiumQuote.calculatedPremium} ETH
                   </span>
                 </p>
                 <p className="text-lg font-semibold text-gray-700">
-                  Major Upcoming Events:{" "}
+                  {t("createPolicyDialogMajorUpcomingEvents")}:{" "}
                   <span className="font-normal text-black-400">
                     {premiumQuote.majorUpcomingEvents}
                   </span>

@@ -13,6 +13,7 @@ import {
   CardContent,
   CardFooter,
 } from "../ui/card";
+import { translations } from "src/locales/translations";
 
 interface Policy {
   policyId: bigint;
@@ -46,6 +47,7 @@ interface MyPoliciesProps {
   setSelectedPolicy: (policy: Policy) => void;
   handleSubmitClaim: (policy: Policy) => void;
   isSubmittingClaim: boolean;
+  selectedLanguage: string;
 }
 
 async function getEthUsdPrice(): Promise<number> {
@@ -64,6 +66,9 @@ async function getEthUsdPrice(): Promise<number> {
   }
 }
 
+type LanguageKey = keyof typeof translations;
+type TranslationKey = keyof (typeof translations)[LanguageKey];
+
 function MyPolicies({
   selectedCurrency,
   setCurrentView,
@@ -71,6 +76,7 @@ function MyPolicies({
   setSelectedPolicy,
   handleSubmitClaim,
   isSubmittingClaim,
+  selectedLanguage,
 }: MyPoliciesProps) {
   const [ethUsdPrice, setEthUsdPrice] = useState<number>(2000);
 
@@ -122,6 +128,9 @@ function MyPolicies({
     return formattedAmount;
   };
 
+  const t = (key: TranslationKey) =>
+    translations[selectedLanguage as LanguageKey][key];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -130,7 +139,9 @@ function MyPolicies({
       transition={{ duration: 0.5 }}
       className="p-4 sm:p-6 w-full"
     >
-      <h2 className="text-3xl font-bold mb-6 text-gray-800">My Policies</h2>
+      <h2 className="text-3xl font-bold mb-6 text-gray-800">
+        {t("myPolicies")}
+      </h2>
       <div className="space-y-6">
         {policies.map((policy, index) => (
           <Card

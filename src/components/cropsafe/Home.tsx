@@ -29,7 +29,11 @@ import {
 import CurrencyPopup from "./CurrencyPopup";
 import Header from "./Header";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dailog";
-import { translations, getLanguageByCountry } from "src/locales/translations";
+import {
+  translations,
+  TranslationKey,
+  getLanguageByCountry,
+} from "src/locales/translations";
 
 interface Policy {
   policyId: bigint;
@@ -72,6 +76,8 @@ export default function CropSafe() {
   const [claimResponse, setClaimResponse] = useState<any>(null);
   const [isSubmittingClaim, setIsSubmittingClaim] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>("en");
+
+  const t = (key: TranslationKey) => translations[selectedLanguage][key];
 
   const { data: policyData } = useContractRead({
     address: createPolicyContractAddress,
@@ -138,6 +144,7 @@ export default function CropSafe() {
       setShowCurrencyPopup={setShowCurrencyPopup}
       selectedCurrency={selectedCurrency}
       setSelectedCurrency={setSelectedCurrency}
+      selectedLanguage={selectedLanguage}
     />
   );
 
@@ -181,6 +188,7 @@ export default function CropSafe() {
       setCurrentView={setCurrentView}
       showPremiumQuote={showPremiumQuote}
       setShowPremiumQuote={setShowPremiumQuote}
+      selectedLanguage={selectedLanguage}
     />
   );
 
@@ -194,12 +202,14 @@ export default function CropSafe() {
       setSelectedPolicy={setSelectedPolicy}
       handleSubmitClaim={handleSubmitClaim}
       isSubmittingClaim={isSubmittingClaim}
+      selectedLanguage={selectedLanguage}
     />
   );
 
   const renderPolicyDetails = () => (
     <PolicyDetails
       selectedCurrency={selectedCurrency}
+      selectedLanguage={selectedLanguage}
       setCurrentView={setCurrentView}
       setShowClaimForm={setShowClaimForm}
       policy={selectedPolicy as any}
@@ -269,15 +279,19 @@ export default function CropSafe() {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-gray-800">
-            Claim Status (Powered by AI)
+            {t("claimStatus")}
           </DialogTitle>
         </DialogHeader>
         {claimResponse && (
           <div
-            className={`p-4 rounded-md ${claimResponse.canClaim ? "bg-green-100" : "bg-red-100"}`}
+            className={`p-4 rounded-md ${
+              claimResponse.canClaim ? "bg-green-100" : "bg-red-100"
+            }`}
           >
             <h3 className="text-lg font-semibold mb-2">
-              {claimResponse.canClaim ? "Claim Eligible" : "Claim Not Eligible"}
+              {claimResponse.canClaim
+                ? t("claimEligible")
+                : t("claimNotEligible")}
             </h3>
             <p className="text-sm text-gray-700">
               {claimResponse.claimConditionMessage}
@@ -307,11 +321,9 @@ export default function CropSafe() {
               >
                 <Card className="w-full max-w-md bg-white shadow-xl rounded-lg overflow-hidden">
                   <CardHeader className="bg-gradient-to-r from-green-400 to-blue-500 text-white">
-                    <CardTitle className="text-2xl">
-                      {translations[selectedLanguage].welcome}
-                    </CardTitle>
+                    <CardTitle className="text-2xl">{t("welcome")}</CardTitle>
                     <CardDescription className="text-gray-100">
-                      {translations[selectedLanguage].login}
+                      {t("login")}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-6">

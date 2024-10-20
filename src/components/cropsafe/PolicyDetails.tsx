@@ -12,6 +12,9 @@ import {
   CardContent,
   CardFooter,
 } from "../ui/card";
+import { translations, TranslationKey } from "src/locales/translations";
+
+type LanguageKey = keyof typeof translations;
 
 const Map = dynamic(() => import("./Map"), { ssr: false });
 
@@ -50,6 +53,7 @@ interface PolicyDetailsProps {
   setCurrentView: (view: string) => void;
   handleSubmitClaim: (policy: Policy) => void;
   isSubmittingClaim: boolean;
+  selectedLanguage: string;
 }
 
 // hardcoded exchange rates
@@ -62,7 +66,11 @@ function PolicyDetails({
   setCurrentView,
   handleSubmitClaim,
   isSubmittingClaim,
+  selectedLanguage,
 }: PolicyDetailsProps) {
+  const t = (key: TranslationKey) =>
+    translations[selectedLanguage as LanguageKey][key];
+
   const formatCurrency = (amount: number, currencyCode: string) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -83,11 +91,11 @@ function PolicyDetails({
     return (
       <div className="p-4 md:p-6 max-w-4xl mx-auto">
         <h2 className="text-3xl font-bold mb-6 text-gray-800">
-          Policy Details
+          {t("policyDetails")}
         </h2>
-        <p>No policy selected. Please go back and select a policy.</p>
+        <p>{t("noPolicySelected")}</p>
         <Button onClick={() => setCurrentView("myPolicies")} className="mt-4">
-          Back to My Policies
+          {t("backToMyPolicies")}
         </Button>
       </div>
     );
@@ -113,18 +121,20 @@ function PolicyDetails({
       transition={{ duration: 0.5 }}
       className="p-4 sm:p-6 w-full"
     >
-      <h2 className="text-3xl font-bold mb-6 text-gray-800">Policy Details</h2>
+      <h2 className="text-3xl font-bold mb-6 text-gray-800">
+        {t("policyDetails")}
+      </h2>
       <Card className="bg-white shadow-xl rounded-lg overflow-hidden">
         <CardHeader className="bg-gradient-to-r from-green-400 to-blue-500 text-white">
           <CardTitle className="text-2xl">{policy.policyName}</CardTitle>
           <CardDescription className="text-gray-100">
-            Policy Number: {policy.policyId.toString()}
+            {t("policyNumber")}: {policy.policyId.toString()}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 space-y-4">
           <p className="text-lg">
             <span className="font-semibold text-gray-700">
-              Coverage Period:
+              {t("coveragePeriod")}
             </span>{" "}
             {new Date(Number(policy.startDate) * 1000).toLocaleDateString()} -{" "}
             {new Date(Number(policy.endDate) * 1000).toLocaleDateString()}
@@ -133,20 +143,22 @@ function PolicyDetails({
             <Map onPositionChange={handlePositionChange} />
           </div>
           <p className="text-lg">
-            <span className="font-semibold text-gray-700">Location:</span>{" "}
+            <span className="font-semibold text-gray-700">{t("location")}</span>{" "}
             Latitude: {mapPosition[0].toFixed(6)}, Longitude:{" "}
             {mapPosition[1].toFixed(6)}
           </p>
           <p className="text-lg">
             <span className="font-semibold text-gray-700">
-              Weather Trigger Condition:
+              {t("weatherTriggerCondition")}
             </span>{" "}
             {policy.weatherCondition.conditionType}{" "}
             {policy.weatherCondition.operator}{" "}
             {policy.weatherCondition.threshold}
           </p>
           <p className="text-lg">
-            <span className="font-semibold text-gray-700">Premium Paid:</span>{" "}
+            <span className="font-semibold text-gray-700">
+              {t("premiumPaid")}
+            </span>{" "}
             <span className="text-green-600">
               {convertEthToSelectedCurrency(policy.premium)}
             </span>
@@ -156,7 +168,7 @@ function PolicyDetails({
           </p>
           <p className="text-lg">
             <span className="font-semibold text-gray-700">
-              Maximum Coverage Amount:
+              {t("maxCoverageAmount")}
             </span>{" "}
             <span className="text-blue-600">
               {convertEthToSelectedCurrency(policy.maxCoverage)}
@@ -166,21 +178,23 @@ function PolicyDetails({
             </span>
           </p>
           <p className="text-lg">
-            <span className="font-semibold text-gray-700">Status:</span>{" "}
+            <span className="font-semibold text-gray-700">{t("status")}</span>{" "}
             <span
               className={policy.isActive ? "text-green-600" : "text-red-600"}
             >
-              {policy.isActive ? "Active" : "Inactive"}
+              {policy.isActive ? t("active") : t("inactive")}
             </span>
           </p>
           <p className="text-lg">
-            <span className="font-semibold text-gray-700">Claim Status:</span>{" "}
+            <span className="font-semibold text-gray-700">
+              {t("claimStatus")}
+            </span>{" "}
             <span
               className={
                 policy.isClaimed ? "text-orange-600" : "text-green-600"
               }
             >
-              {policy.isClaimed ? "Claimed" : "Not Claimed"}
+              {policy.isClaimed ? t("claimed") : t("notClaimed")}
             </span>
           </p>
         </CardContent>
@@ -191,10 +205,10 @@ function PolicyDetails({
             disabled={!policy.isActive || policy.isClaimed || isSubmittingClaim}
           >
             {policy.isClaimed
-              ? "Claim Already Filed"
+              ? t("claimAlreadyFiled")
               : isSubmittingClaim
-                ? "Submitting..."
-                : "File a Claim"}
+                ? t("submitting")
+                : t("fileClaim")}
           </Button>
         </CardFooter>
       </Card>
