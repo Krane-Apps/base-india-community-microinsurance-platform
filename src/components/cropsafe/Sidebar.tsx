@@ -57,7 +57,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           className="flex items-center mb-4"
         >
           <Home className="mr-2" />
-          {t("dashboard")}
+          {t("goBackHome")}
         </Button>
 
         <div className="mb-4">

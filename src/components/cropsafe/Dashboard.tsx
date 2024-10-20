@@ -1,20 +1,61 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { PlusCircle, FileText, AlertCircle, Copy, Check } from "lucide-react";
-import { formatCurrency } from "src/helper";
+import { formatCurrency, Currency } from "src/helper";
 import { Button } from "../ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { translations, TranslationKey } from "src/locales/translations";
+import { currencies } from "src/constants";
 
 type LanguageKey = keyof typeof translations;
 
 interface DashboardProps {
   setCurrentView: (view: string) => void;
   basename: string;
-  selectedCurrency: any;
+  selectedCurrency: Currency;
   address: string;
   selectedLanguage: string;
+  policies: Policy[] | undefined;
+}
+
+interface Policy {
+  policyId: bigint;
+  policyholder: string;
+  basename: string;
+  policyName: string;
+  location: { latitude: bigint; logitude: bigint };
+  startDate: bigint;
+  endDate: bigint;
+  premium: bigint;
+  premiumCurrency: string;
+  maxCoverage: bigint;
+  coverageCurrency: string;
+  weatherCondition: {
+    conditionType: string;
+    threshold: string;
+    operator: string;
+  };
+  isActive: boolean;
+  isClaimed: boolean;
+  createdAt: bigint;
+  updatedAt: bigint;
+}
+
+async function getEthUsdPrice(): Promise<number> {
+  try {
+    const response = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
+    );
+    const data = await response.json();
+    return data.ethereum.usd;
+  } catch (error) {
+    console.error(
+      "Dashboard: Failed to fetch ETH price, using fallback value",
+      error
+    );
+    return 2460; // fallback
+  }
 }
 
 function Dashboard({
@@ -23,8 +64,14 @@ function Dashboard({
   selectedCurrency,
   address,
   selectedLanguage,
+  policies,
 }: DashboardProps) {
   const [showCopied, setShowCopied] = useState(false);
+  const [ethUsdPrice, setEthUsdPrice] = useState<number>(2000);
+
+  useEffect(() => {
+    getEthUsdPrice().then(setEthUsdPrice);
+  }, []);
 
   const handleCopySuccess = () => {
     setShowCopied(true);
@@ -34,6 +81,34 @@ function Dashboard({
 
   const t = (key: TranslationKey) =>
     translations[selectedLanguage as LanguageKey][key];
+
+  const convertWeiToSelectedCurrency = (
+    weiAmount: bigint,
+    selectedCurrency: Currency
+  ): string => {
+    const ethAmount = Number(weiAmount) / 1e18;
+    const usdAmount = ethAmount * ethUsdPrice;
+    const currencyRate =
+      currencies.find((c) => c.code === selectedCurrency.code)?.rate || 1;
+    const convertedAmount = usdAmount * currencyRate;
+
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: selectedCurrency.code,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(convertedAmount);
+  };
+
+  // calculate dashboard statistics
+  const activePolicies =
+    policies?.filter((policy) => policy.isActive).length ?? 0;
+  const pendingClaims =
+    policies?.filter((policy) => policy.isActive && !policy.isClaimed).length ??
+    0;
+  const totalCoverage =
+    policies?.reduce((sum, policy) => sum + policy.maxCoverage, BigInt(0)) ??
+    BigInt(0);
 
   return (
     <motion.div
@@ -99,16 +174,19 @@ function Dashboard({
               <div>
                 <p className="text-lg font-semibold text-gray-700">
                   {t("activePolicies")}:{" "}
-                  <span className="text-green-600">2</span>
+                  <span className="text-green-600">{activePolicies}</span>
                 </p>
                 <p className="text-lg font-semibold text-gray-700">
                   {t("pendingClaims")}:{" "}
-                  <span className="text-yellow-600">1</span>
+                  <span className="text-yellow-600">{pendingClaims}</span>
                 </p>
                 <p className="text-lg font-semibold text-gray-700">
                   {t("totalCoverage")}:{" "}
                   <span className="text-blue-600">
-                    {formatCurrency(BigInt("20000"), selectedCurrency)}
+                    {convertWeiToSelectedCurrency(
+                      totalCoverage,
+                      selectedCurrency
+                    )}
                   </span>
                 </p>
               </div>

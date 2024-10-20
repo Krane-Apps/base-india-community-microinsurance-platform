@@ -60,6 +60,7 @@ export const translations = {
     submissionLink: "Submission Link",
     close: "Close",
     calculationTimeMessage: "Premium calculation usually takes about 60 seconds. Please wait.",
+    goBackHome: "Go Back Home",
   },
   th: {
     welcome: "ยินดีต้อนรับสู่ CropSafe",
@@ -117,11 +118,12 @@ export const translations = {
     createPolicyDialogMajorUpcomingEvents: "เหตุการณ์สำคัญที่กำลังจะเกิดขึ้น",
     createPolicyDialogCreatePolicy: "สร้างกรมธรรม์",
     noPoliciesYet: "คุณยังไม่มีกรมธรรม์",
-    createYourFirstPolicy: "สร้างกรมธรรม์แรกของคุณ",
+    createYourFirstPolicy: "ส���้างกรมธรรม์แรกของคุณ",
     githubRepo: "GitHub Repo",
     submissionLink: "Submission Link",
     close: "Close",
     calculationTimeMessage: "การคำนวณเบี้ยประกันมักใช้เวลาประมาณ 60 วินาที โปรดรอสักครู่",
+    goBackHome: "กลับไปหน้าหลัก",
   },
   id: {
     welcome: "Selamat datang",
@@ -184,6 +186,7 @@ export const translations = {
     submissionLink: "Submission Link",
     close: "Close",
     calculationTimeMessage: "Premium calculation usually takes about 60 seconds. Please wait.",
+    goBackHome: "Kembali ke Beranda",
   },
   ms: {
     welcome: "Selamat datang",
@@ -246,6 +249,7 @@ export const translations = {
     submissionLink: "Submission Link",
     close: "Close",
     calculationTimeMessage: "Premium calculation usually takes about 60 seconds. Please wait.",
+    goBackHome: "Kembali ke Laman Utama",
   },
   vi: {
     welcome: "Chào mừng",
@@ -308,6 +312,7 @@ export const translations = {
     submissionLink: "Submission Link",
     close: "Close",
     calculationTimeMessage: "Premium calculation usually takes about 60 seconds. Please wait.",
+    goBackHome: "Quay về Trang chủ",
   },
   tl: {
     welcome: "Maligayang pagdating",
@@ -370,6 +375,7 @@ export const translations = {
     submissionLink: "Submission Link",
     close: "Close",
     calculationTimeMessage: "Premium calculation usually takes about 60 seconds. Please wait.",
+    goBackHome: "Bumalik sa Home",
   },
   km: {
     welcome: "សូមស្វាគមន៍",
@@ -432,6 +438,7 @@ export const translations = {
     submissionLink: "Submission Link",
     close: "Close",
     calculationTimeMessage: "Premium calculation usually takes about 60 seconds. Please wait.",
+    goBackHome: "ត្រឡប់ទៅទំព័រដើម",
   },
   my: {
     welcome: "ကြိုဆိုပါသည်",
@@ -494,6 +501,7 @@ export const translations = {
     submissionLink: "Submission Link",
     close: "Close",
     calculationTimeMessage: "Premium calculation usually takes about 60 seconds. Please wait.",
+    goBackHome: "ပင်မစာမျက်နှာသို့ပြန်သွားရန်",
   },
   lo: {
     welcome: "ຍິນດີຕ້ອນຮັບ",
@@ -556,6 +564,7 @@ export const translations = {
     submissionLink: "Submission Link",
     close: "Close",
     calculationTimeMessage: "Premium calculation usually takes about 60 seconds. Please wait.",
+    goBackHome: "ກັບໄປໜ້າຫຼັກ",
   },
 };
 

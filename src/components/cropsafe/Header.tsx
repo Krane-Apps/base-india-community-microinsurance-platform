@@ -32,10 +32,17 @@ function Header({
 }: HeaderProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const handleLogoClick = () => {
+    setCurrentView("dashboard");
+  };
+
   return (
     <header className="sticky top-0 z-50 bg-white shadow-md w-full">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-2 flex justify-between items-center">
-        <div className="flex items-center header-logo">
+        <div
+          className="flex items-center header-logo cursor-pointer"
+          onClick={handleLogoClick}
+        >
           <Image
             src="/logo.png"
             alt="CropSafe Logo"
