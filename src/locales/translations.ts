@@ -53,7 +53,13 @@ export const translations = {
     createPolicyDialogRiskFactor: "Risk Factor",
     createPolicyDialogCalculatedPremium: "Calculated Premium",
     createPolicyDialogMajorUpcomingEvents: "Major Upcoming Events",
-    createPolicyDialogCreatePolicy: "Create Policy"
+    createPolicyDialogCreatePolicy: "Create Policy",
+    noPoliciesYet: "You don't have any policies yet.",
+    createYourFirstPolicy: "Create Your First Policy",
+    githubRepo: "GitHub Repo",
+    submissionLink: "Submission Link",
+    close: "Close",
+    calculationTimeMessage: "Premium calculation usually takes about 60 seconds. Please wait.",
   },
   th: {
     welcome: "ยินดีต้อนรับสู่ CropSafe",
@@ -109,7 +115,13 @@ export const translations = {
     createPolicyDialogRiskFactor: "ปัจจัยความเสี่ยง",
     createPolicyDialogCalculatedPremium: "เบี้ยประกันที่คำนวณ",
     createPolicyDialogMajorUpcomingEvents: "เหตุการณ์สำคัญที่กำลังจะเกิดขึ้น",
-    createPolicyDialogCreatePolicy: "สร้างกรมธรรม์"
+    createPolicyDialogCreatePolicy: "สร้างกรมธรรม์",
+    noPoliciesYet: "คุณยังไม่มีกรมธรรม์",
+    createYourFirstPolicy: "สร้างกรมธรรม์แรกของคุณ",
+    githubRepo: "GitHub Repo",
+    submissionLink: "Submission Link",
+    close: "Close",
+    calculationTimeMessage: "การคำนวณเบี้ยประกันมักใช้เวลาประมาณ 60 วินาที โปรดรอสักครู่",
   },
   id: {
     welcome: "Selamat datang",
@@ -165,7 +177,13 @@ export const translations = {
     createPolicyDialogRiskFactor: "Risk Factor",
     createPolicyDialogCalculatedPremium: "Calculated Premium",
     createPolicyDialogMajorUpcomingEvents: "Major Upcoming Events",
-    createPolicyDialogCreatePolicy: "Create Policy"
+    createPolicyDialogCreatePolicy: "Create Policy",
+    noPoliciesYet: "Anda belum memiliki polis.",
+    createYourFirstPolicy: "Buat Polis Pertama Anda",
+    githubRepo: "GitHub Repo",
+    submissionLink: "Submission Link",
+    close: "Close",
+    calculationTimeMessage: "Premium calculation usually takes about 60 seconds. Please wait.",
   },
   ms: {
     welcome: "Selamat datang",
@@ -221,7 +239,13 @@ export const translations = {
     createPolicyDialogRiskFactor: "Risk Factor",
     createPolicyDialogCalculatedPremium: "Calculated Premium",
     createPolicyDialogMajorUpcomingEvents: "Major Upcoming Events",
-    createPolicyDialogCreatePolicy: "Create Policy"
+    createPolicyDialogCreatePolicy: "Create Policy",
+    noPoliciesYet: "Anda belum mempunyai polisi.",
+    createYourFirstPolicy: "Buat Polisi Pertama Anda",
+    githubRepo: "GitHub Repo",
+    submissionLink: "Submission Link",
+    close: "Close",
+    calculationTimeMessage: "Premium calculation usually takes about 60 seconds. Please wait.",
   },
   vi: {
     welcome: "Chào mừng",
@@ -277,7 +301,13 @@ export const translations = {
     createPolicyDialogRiskFactor: "Risk Factor",
     createPolicyDialogCalculatedPremium: "Calculated Premium",
     createPolicyDialogMajorUpcomingEvents: "Major Upcoming Events",
-    createPolicyDialogCreatePolicy: "Create Policy"
+    createPolicyDialogCreatePolicy: "Create Policy",
+    noPoliciesYet: "Bạn chưa có hợp đồng bảo hiểm nào.",
+    createYourFirstPolicy: "Tạo Hợp Đồng Đầu Tiên Của Bạn",
+    githubRepo: "GitHub Repo",
+    submissionLink: "Submission Link",
+    close: "Close",
+    calculationTimeMessage: "Premium calculation usually takes about 60 seconds. Please wait.",
   },
   tl: {
     welcome: "Maligayang pagdating",
@@ -333,7 +363,13 @@ export const translations = {
     createPolicyDialogRiskFactor: "Risk Factor",
     createPolicyDialogCalculatedPremium: "Calculated Premium",
     createPolicyDialogMajorUpcomingEvents: "Major Upcoming Events",
-    createPolicyDialogCreatePolicy: "Create Policy"
+    createPolicyDialogCreatePolicy: "Create Policy",
+    noPoliciesYet: "Wala ka pang mga polisiya.",
+    createYourFirstPolicy: "Gumawa ng Iyong Unang Polisiya",
+    githubRepo: "GitHub Repo",
+    submissionLink: "Submission Link",
+    close: "Close",
+    calculationTimeMessage: "Premium calculation usually takes about 60 seconds. Please wait.",
   },
   km: {
     welcome: "សូមស្វាគមន៍",
@@ -389,7 +425,13 @@ export const translations = {
     createPolicyDialogRiskFactor: "Risk Factor",
     createPolicyDialogCalculatedPremium: "Calculated Premium",
     createPolicyDialogMajorUpcomingEvents: "Major Upcoming Events",
-    createPolicyDialogCreatePolicy: "Create Policy"
+    createPolicyDialogCreatePolicy: "Create Policy",
+    noPoliciesYet: "អ្នកមិនទាន់មានគោលនយោបាយណាមួយនៅឡើយទេ។",
+    createYourFirstPolicy: "បង្កើតគោលនយោបាយដំបូងរបស់អ្នក",
+    githubRepo: "GitHub Repo",
+    submissionLink: "Submission Link",
+    close: "Close",
+    calculationTimeMessage: "Premium calculation usually takes about 60 seconds. Please wait.",
   },
   my: {
     welcome: "ကြိုဆိုပါသည်",
@@ -445,7 +487,13 @@ export const translations = {
     createPolicyDialogRiskFactor: "Risk Factor",
     createPolicyDialogCalculatedPremium: "Calculated Premium",
     createPolicyDialogMajorUpcomingEvents: "Major Upcoming Events",
-    createPolicyDialogCreatePolicy: "Create Policy"
+    createPolicyDialogCreatePolicy: "Create Policy",
+    noPoliciesYet: "ငါမှားမှုမရှိသောမူဝါဒများ",
+    createYourFirstPolicy: "မူဝါဒအသစ်ဖန်တီးရန်",
+    githubRepo: "GitHub Repo",
+    submissionLink: "Submission Link",
+    close: "Close",
+    calculationTimeMessage: "Premium calculation usually takes about 60 seconds. Please wait.",
   },
   lo: {
     welcome: "ຍິນດີຕ້ອນຮັບ",
@@ -501,7 +549,13 @@ export const translations = {
     createPolicyDialogRiskFactor: "Risk Factor",
     createPolicyDialogCalculatedPremium: "Calculated Premium",
     createPolicyDialogMajorUpcomingEvents: "Major Upcoming Events",
-    createPolicyDialogCreatePolicy: "Create Policy"
+    createPolicyDialogCreatePolicy: "Create Policy",
+    noPoliciesYet: "ຄຸຓຢັງໄມ່ມີກຣມຘຣຣມ໌",
+    createYourFirstPolicy: "ສ້າງກຣມຘຣຣມ໌ຂອງຂ້ອຍ",
+    githubRepo: "GitHub Repo",
+    submissionLink: "Submission Link",
+    close: "Close",
+    calculationTimeMessage: "Premium calculation usually takes about 60 seconds. Please wait.",
   },
 };
 

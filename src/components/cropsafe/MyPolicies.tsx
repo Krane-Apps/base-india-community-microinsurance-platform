@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Umbrella, Thermometer } from "lucide-react";
+import { Umbrella, Thermometer, PlusCircle } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { Currency } from "src/helper";
 import { currencies } from "src/constants";
@@ -142,104 +142,119 @@ function MyPolicies({
       <h2 className="text-3xl font-bold mb-6 text-gray-800">
         {t("myPolicies")}
       </h2>
-      <div className="space-y-6">
-        {policies.map((policy, index) => (
-          <Card
-            key={index}
-            className="policy-card bg-white shadow-xl rounded-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300"
+      {policies.length === 0 ? (
+        <div className="text-center py-8 flex flex-col items-center justify-center">
+          <p className="text-xl mb-4">{t("noPoliciesYet")}</p>
+          <Button
+            onClick={() => setCurrentView("createPolicy")}
+            className="bg-green-600 hover:bg-green-700 transition-colors duration-300 flex items-center justify-center"
           >
-            <CardHeader className="bg-gradient-to-r from-green-400 to-blue-500 text-white">
-              <div className="flex items-center space-x-4">
-                {policy.weatherCondition.conditionType === "rainfall" ? (
-                  <Umbrella className="h-8 w-8" />
-                ) : (
-                  <Thermometer className="h-8 w-8" />
-                )}
-                <div>
-                  <CardTitle className="text-xl">{policy.policyName}</CardTitle>
-                  <CardDescription className="text-gray-100">
-                    {new Date(
-                      Number(policy.startDate) * 1000
-                    ).toLocaleDateString()}{" "}
-                    -{" "}
-                    {new Date(
-                      Number(policy.endDate) * 1000
-                    ).toLocaleDateString()}
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-6">
-              <p className="text-lg font-semibold text-gray-700">
-                Status:{" "}
-                <span
-                  className={
-                    policy.isActive ? "text-green-600" : "text-red-600"
-                  }
-                >
-                  {policy.isActive ? "Active" : "Inactive"}
-                </span>
-              </p>
-              <p className="text-lg font-semibold text-gray-700">
-                Coverage:{" "}
-                <span className="text-blue-600">
-                  {convertWeiToSelectedCurrency(
-                    policy.maxCoverage,
-                    selectedCurrency
+            <PlusCircle className="mr-2 h-5 w-5" />
+            {t("createYourFirstPolicy")}
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {policies.map((policy, index) => (
+            <Card
+              key={index}
+              className="policy-card bg-white shadow-xl rounded-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300"
+            >
+              <CardHeader className="bg-gradient-to-r from-green-400 to-blue-500 text-white">
+                <div className="flex items-center space-x-4">
+                  {policy.weatherCondition.conditionType === "rainfall" ? (
+                    <Umbrella className="h-8 w-8" />
+                  ) : (
+                    <Thermometer className="h-8 w-8" />
                   )}
-                </span>
-              </p>
-              <p className="text-lg font-semibold text-gray-700">
-                Weather Condition:{" "}
-                {policy.weatherCondition.operator === "greaterThan" ? (
-                  <>
-                    {policy.weatherCondition.conditionType} above{" "}
-                    {policy.weatherCondition.threshold}
-                  </>
-                ) : policy.weatherCondition.operator === "lessThan" ? (
-                  <>
-                    {policy.weatherCondition.conditionType} below{" "}
-                    {policy.weatherCondition.threshold}
-                  </>
-                ) : (
-                  <>
-                    {policy.weatherCondition.conditionType}{" "}
-                    {policy.weatherCondition.operator}{" "}
-                    {policy.weatherCondition.threshold}
-                  </>
-                )}
-              </p>
-            </CardContent>
-            <CardFooter className="bg-gray-50 p-4">
-              <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 w-full">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSelectedPolicy(policy);
-                    setCurrentView("policyDetails");
-                  }}
-                  className="w-full sm:w-auto"
-                >
-                  View Details
-                </Button>
-                <Button
-                  onClick={() => handleSubmitClaim(policy)}
-                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 transition-colors duration-300"
-                  disabled={
-                    !policy.isActive || policy.isClaimed || isSubmittingClaim
-                  }
-                >
-                  {policy.isClaimed
-                    ? "Claim Filed"
-                    : isSubmittingClaim
-                      ? "Submitting..."
-                      : "File a Claim"}
-                </Button>
-              </div>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+                  <div>
+                    <CardTitle className="text-xl">
+                      {policy.policyName}
+                    </CardTitle>
+                    <CardDescription className="text-gray-100">
+                      {new Date(
+                        Number(policy.startDate) * 1000
+                      ).toLocaleDateString()}{" "}
+                      -{" "}
+                      {new Date(
+                        Number(policy.endDate) * 1000
+                      ).toLocaleDateString()}
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-6">
+                <p className="text-lg font-semibold text-gray-700">
+                  Status:{" "}
+                  <span
+                    className={
+                      policy.isActive ? "text-green-600" : "text-red-600"
+                    }
+                  >
+                    {policy.isActive ? "Active" : "Inactive"}
+                  </span>
+                </p>
+                <p className="text-lg font-semibold text-gray-700">
+                  Coverage:{" "}
+                  <span className="text-blue-600">
+                    {convertWeiToSelectedCurrency(
+                      policy.maxCoverage,
+                      selectedCurrency
+                    )}
+                  </span>
+                </p>
+                <p className="text-lg font-semibold text-gray-700">
+                  Weather Condition:{" "}
+                  {policy.weatherCondition.operator === "greaterThan" ? (
+                    <>
+                      {policy.weatherCondition.conditionType} above{" "}
+                      {policy.weatherCondition.threshold}
+                    </>
+                  ) : policy.weatherCondition.operator === "lessThan" ? (
+                    <>
+                      {policy.weatherCondition.conditionType} below{" "}
+                      {policy.weatherCondition.threshold}
+                    </>
+                  ) : (
+                    <>
+                      {policy.weatherCondition.conditionType}{" "}
+                      {policy.weatherCondition.operator}{" "}
+                      {policy.weatherCondition.threshold}
+                    </>
+                  )}
+                </p>
+              </CardContent>
+              <CardFooter className="bg-gray-50 p-4">
+                <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 w-full">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedPolicy(policy);
+                      setCurrentView("policyDetails");
+                    }}
+                    className="w-full sm:w-auto"
+                  >
+                    View Details
+                  </Button>
+                  <Button
+                    onClick={() => handleSubmitClaim(policy)}
+                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 transition-colors duration-300"
+                    disabled={
+                      !policy.isActive || policy.isClaimed || isSubmittingClaim
+                    }
+                  >
+                    {policy.isClaimed
+                      ? "Claim Filed"
+                      : isSubmittingClaim
+                        ? "Submitting..."
+                        : "File a Claim"}
+                  </Button>
+                </div>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      )}
     </motion.div>
   );
 }

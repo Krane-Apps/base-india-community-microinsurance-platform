@@ -7,6 +7,7 @@ import Select from "react-select";
 import { useAccount } from "wagmi";
 import { parseEther } from "viem";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { Loader2 } from "lucide-react";
 
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -460,10 +461,22 @@ function CreatePolicy({
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-green-600 hover:bg-green-700 transition-colors duration-300"
+              className="w-full bg-green-600 hover:bg-green-700 transition-colors duration-300 flex items-center justify-center"
             >
-              {isLoading ? t("calculating") : t("calculatePremium")}
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t("calculating")}
+                </>
+              ) : (
+                t("calculatePremium")
+              )}
             </Button>
+            {isLoading && (
+              <p className="text-sm text-gray-600 text-center mt-2">
+                {t("calculationTimeMessage")}
+              </p>
+            )}
           </form>
         </CardContent>
       </Card>
