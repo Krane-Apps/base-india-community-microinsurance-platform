@@ -12,7 +12,7 @@ import type {
 } from "@coinbase/onchainkit/transaction";
 import type { Address, ContractFunctionParameters } from "viem";
 import {
-  BASE_SEPOLIA_CHAIN_ID,
+  BASE_CHAIN_ID,
   createPolicyABI,
   createPolicyContractAddress,
 } from "../constants";
@@ -90,12 +90,12 @@ export default function TransactionWrapper({
       <Transaction
         contracts={contracts}
         className="w-[450px]"
-        chainId={BASE_SEPOLIA_CHAIN_ID}
+        chainId={BASE_CHAIN_ID}
         onError={handleError}
         onSuccess={handleSuccess}
         capabilities={{
           paymasterService: {
-            url: paymasterAndBundlerEndpoint as string,
+            url: process.env.NEXT_PUBLIC_PAYMASTER_AND_BUNDLER_ENDPOINT!,
           },
         }}
       >
